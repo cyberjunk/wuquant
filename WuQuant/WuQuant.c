@@ -28,9 +28,9 @@ inline int GetIndex(int r, int g, int b, int a)
       + r + g + b + a;
 }
 
-inline double Volume(Box* cube, long long* moment)
+inline float Volume(Box* cube, int* moment)
 {
-   return (double)(moment[GetIndex(cube->R1, cube->G1, cube->B1, cube->A1)]
+   return (float)(moment[GetIndex(cube->R1, cube->G1, cube->B1, cube->A1)]
       - moment[GetIndex(cube->R1, cube->G1, cube->B1, cube->A0)]
       - moment[GetIndex(cube->R1, cube->G1, cube->B0, cube->A1)]
       + moment[GetIndex(cube->R1, cube->G1, cube->B0, cube->A0)]
@@ -48,7 +48,7 @@ inline double Volume(Box* cube, long long* moment)
       + moment[GetIndex(cube->R0, cube->G0, cube->B0, cube->A0)]);
 }
 
-inline long long Bottom(Box* cube, int direction, long long* moment)
+inline int Bottom(Box* cube, int direction, int* moment)
 {
    switch (direction)
    {
@@ -101,7 +101,7 @@ inline long long Bottom(Box* cube, int direction, long long* moment)
    }
 }
 
-inline long long Top(Box* cube, int direction, int position, long long* moment)
+inline int Top(Box* cube, int direction, int position, int* moment)
 {
    switch (direction)
    {
@@ -227,12 +227,12 @@ void Get3DMoments(Quantizer* quantizer)
 
          for (int b = 1; b < INDEXCOUNT; b++)
          {
-            long long line = 0;
-            long long lineR = 0;
-            long long lineG = 0;
-            long long lineB = 0;
-            long long lineA = 0;
-            double line2 = 0;
+            int line = 0;
+            int lineR = 0;
+            int lineG = 0;
+            int lineB = 0;
+            int lineA = 0;
+            float line2 = 0;
 
             for (int a = 1; a < INDEXALPHACOUNT; a++)
             {
@@ -275,14 +275,14 @@ void Get3DMoments(Quantizer* quantizer)
    }
 }
 
-inline double Variance(Quantizer* quantizer, Box* cube)
+inline float Variance(Quantizer* quantizer, Box* cube)
 {
-   double dr = Volume(cube, quantizer->vmr);
-   double dg = Volume(cube, quantizer->vmg);
-   double db = Volume(cube, quantizer->vmb);
-   double da = Volume(cube, quantizer->vma);
+   float dr = Volume(cube, quantizer->vmr);
+   float dg = Volume(cube, quantizer->vmg);
+   float db = Volume(cube, quantizer->vmb);
+   float da = Volume(cube, quantizer->vma);
 
-   double xx =
+   float xx =
       quantizer->m2[GetIndex(cube->R1, cube->G1, cube->B1, cube->A1)]
       - quantizer->m2[GetIndex(cube->R1, cube->G1, cube->B1, cube->A0)]
       - quantizer->m2[GetIndex(cube->R1, cube->G1, cube->B0, cube->A1)]
@@ -303,31 +303,31 @@ inline double Variance(Quantizer* quantizer, Box* cube)
    return xx - (((dr * dr) + (dg * dg) + (db * db) + (da * da)) / Volume(cube, quantizer->vwt));
 }
 
-double Maximize(Quantizer* quantizer, Box* cube, int direction, int first, int last, int* cut, double wholeR, double wholeG, double wholeB, double wholeA, double wholeW)
+float Maximize(Quantizer* quantizer, Box* cube, int direction, int first, int last, int* cut, float wholeR, float wholeG, float wholeB, float wholeA, float wholeW)
 {
-   long long baseR = Bottom(cube, direction, quantizer->vmr);
-   long long baseG = Bottom(cube, direction, quantizer->vmg);
-   long long baseB = Bottom(cube, direction, quantizer->vmb);
-   long long baseA = Bottom(cube, direction, quantizer->vma);
-   long long baseW = Bottom(cube, direction, quantizer->vwt);
+   int baseR = Bottom(cube, direction, quantizer->vmr);
+   int baseG = Bottom(cube, direction, quantizer->vmg);
+   int baseB = Bottom(cube, direction, quantizer->vmb);
+   int baseA = Bottom(cube, direction, quantizer->vma);
+   int baseW = Bottom(cube, direction, quantizer->vwt);
 
-   double max = 0.0;
+   float max = 0.0;
    *cut = -1;
 
    for (int i = first; i < last; i++)
    {
-      double halfR = (double)(baseR + Top(cube, direction, i, quantizer->vmr));
-      double halfG = (double)(baseG + Top(cube, direction, i, quantizer->vmg));
-      double halfB = (double)(baseB + Top(cube, direction, i, quantizer->vmb));
-      double halfA = (double)(baseA + Top(cube, direction, i, quantizer->vma));
-      double halfW = (double)(baseW + Top(cube, direction, i, quantizer->vwt));
+      float halfR = (float)(baseR + Top(cube, direction, i, quantizer->vmr));
+      float halfG = (float)(baseG + Top(cube, direction, i, quantizer->vmg));
+      float halfB = (float)(baseB + Top(cube, direction, i, quantizer->vmb));
+      float halfA = (float)(baseA + Top(cube, direction, i, quantizer->vma));
+      float halfW = (float)(baseW + Top(cube, direction, i, quantizer->vwt));
 
       if (halfW == 0)
       {
          continue;
       }
 
-      double temp = ((halfR * halfR) + (halfG * halfG) + (halfB * halfB) + (halfA * halfA)) / halfW;
+      float temp = ((halfR * halfR) + (halfG * halfG) + (halfB * halfB) + (halfA * halfA)) / halfW;
 
       halfR = wholeR - halfR;
       halfG = wholeG - halfG;
@@ -354,21 +354,21 @@ double Maximize(Quantizer* quantizer, Box* cube, int direction, int first, int l
 
 int Cut(Quantizer* quantizer, Box* set1, Box* set2)
 {
-   double wholeR = Volume(set1, quantizer->vmr);
-   double wholeG = Volume(set1, quantizer->vmg);
-   double wholeB = Volume(set1, quantizer->vmb);
-   double wholeA = Volume(set1, quantizer->vma);
-   double wholeW = Volume(set1, quantizer->vwt);
+   float wholeR = Volume(set1, quantizer->vmr);
+   float wholeG = Volume(set1, quantizer->vmg);
+   float wholeB = Volume(set1, quantizer->vmb);
+   float wholeA = Volume(set1, quantizer->vma);
+   float wholeW = Volume(set1, quantizer->vwt);
 
    int cutr;
    int cutg;
    int cutb;
    int cuta;
 
-   double maxr = Maximize(quantizer, set1, 3, set1->R0 + 1, set1->R1, &cutr, wholeR, wholeG, wholeB, wholeA, wholeW);
-   double maxg = Maximize(quantizer, set1, 2, set1->G0 + 1, set1->G1, &cutg, wholeR, wholeG, wholeB, wholeA, wholeW);
-   double maxb = Maximize(quantizer, set1, 1, set1->B0 + 1, set1->B1, &cutb, wholeR, wholeG, wholeB, wholeA, wholeW);
-   double maxa = Maximize(quantizer, set1, 0, set1->A0 + 1, set1->A1, &cuta, wholeR, wholeG, wholeB, wholeA, wholeW);
+   float maxr = Maximize(quantizer, set1, 3, set1->R0 + 1, set1->R1, &cutr, wholeR, wholeG, wholeB, wholeA, wholeW);
+   float maxg = Maximize(quantizer, set1, 2, set1->G0 + 1, set1->G1, &cutg, wholeR, wholeG, wholeB, wholeA, wholeW);
+   float maxb = Maximize(quantizer, set1, 1, set1->B0 + 1, set1->B1, &cutb, wholeR, wholeG, wholeB, wholeA, wholeW);
+   float maxa = Maximize(quantizer, set1, 0, set1->A0 + 1, set1->A1, &cuta, wholeR, wholeG, wholeB, wholeA, wholeW);
 
    int dir;
 
@@ -467,18 +467,18 @@ void BuildCube(Quantizer* quantizer, int* colorCount)
    {
       if (Cut(quantizer, &quantizer->cube[next], &quantizer->cube[i]))
       {
-         quantizer->vv[next] = quantizer->cube[next].Volume > 1 ? Variance(quantizer, &quantizer->cube[next]) : 0.0;
-         quantizer->vv[i] = quantizer->cube[i].Volume > 1 ? Variance(quantizer, &quantizer->cube[i]) : 0.0;
+         quantizer->vv[next] = quantizer->cube[next].Volume > 1 ? Variance(quantizer, &quantizer->cube[next]) : 0.0f;
+         quantizer->vv[i] = quantizer->cube[i].Volume > 1 ? Variance(quantizer, &quantizer->cube[i]) : 0.0f;
       }
       else
       {
-         quantizer->vv[next] = 0.0;
+         quantizer->vv[next] = 0.0f;
          i--;
       }
 
       next = 0;
 
-      double temp = quantizer->vv[0];
+      float temp = quantizer->vv[0];
       for (int k = 1; k <= i; k++)
       {
          if (quantizer->vv[k] > temp)
@@ -506,14 +506,14 @@ void GenerateResult(Quantizer* quantizer, unsigned int* image, unsigned int* pal
    {
       Mark(quantizer, &quantizer->cube[k], (char)k);
 
-      double weight = Volume(&quantizer->cube[k], quantizer->vwt);
+      float weight = Volume(&quantizer->cube[k], quantizer->vwt);
 
       if (weight > 0.01 || weight < -0.01)
       {
-         double da = Volume(&quantizer->cube[k], quantizer->vma) / weight;
-         double dr = Volume(&quantizer->cube[k], quantizer->vmr) / weight;
-         double dg = Volume(&quantizer->cube[k], quantizer->vmg) / weight;
-         double db = Volume(&quantizer->cube[k], quantizer->vmb) / weight;
+         float da = Volume(&quantizer->cube[k], quantizer->vma) / weight;
+         float dr = Volume(&quantizer->cube[k], quantizer->vmr) / weight;
+         float dg = Volume(&quantizer->cube[k], quantizer->vmg) / weight;
+         float db = Volume(&quantizer->cube[k], quantizer->vmb) / weight;
 
          unsigned int a = (unsigned int)da;
          unsigned int r = (unsigned int)dr;

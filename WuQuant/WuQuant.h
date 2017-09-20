@@ -38,27 +38,27 @@ typedef struct
 
 typedef struct
 {
-   long long vwt[TABLELENGTH];
-   long long vmr[TABLELENGTH];
-   long long vmg[TABLELENGTH];
-   long long vmb[TABLELENGTH];
-   long long vma[TABLELENGTH];
-   double    m2[TABLELENGTH];
-   char      tag[TABLELENGTH];
-   long long volume[WORKARRAYSIZE];
-   long long volumeR[WORKARRAYSIZE];
-   long long volumeG[WORKARRAYSIZE];
-   long long volumeB[WORKARRAYSIZE];
-   long long volumeA[WORKARRAYSIZE];
-   double    volume2[WORKARRAYSIZE];
-   long long area[INDEXALPHACOUNT];
-   long long areaR[INDEXALPHACOUNT];
-   long long areaG[INDEXALPHACOUNT];
-   long long areaB[INDEXALPHACOUNT];
-   long long areaA[INDEXALPHACOUNT];
-   double    area2[INDEXALPHACOUNT];
-   double    vv[MAXCOLORS];
-   Box       cube[MAXCOLORS];
+   int vwt[TABLELENGTH];
+   int vmr[TABLELENGTH];
+   int vmg[TABLELENGTH];
+   int vmb[TABLELENGTH];
+   int vma[TABLELENGTH];
+   float m2[TABLELENGTH];
+   char  tag[TABLELENGTH];
+   int volume[WORKARRAYSIZE];
+   int volumeR[WORKARRAYSIZE];
+   int volumeG[WORKARRAYSIZE];
+   int volumeB[WORKARRAYSIZE];
+   int volumeA[WORKARRAYSIZE];
+   float volume2[WORKARRAYSIZE];
+   int area[INDEXALPHACOUNT];
+   int areaR[INDEXALPHACOUNT];
+   int areaG[INDEXALPHACOUNT];
+   int areaB[INDEXALPHACOUNT];
+   int areaA[INDEXALPHACOUNT];
+   float area2[INDEXALPHACOUNT];
+   float vv[MAXCOLORS];
+   Box   cube[MAXCOLORS];
 } Quantizer;
 
 EXPORT Quantizer* Create();
