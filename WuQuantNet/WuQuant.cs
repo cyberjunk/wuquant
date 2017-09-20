@@ -6,34 +6,23 @@ namespace WuQuantNet
     using System.Drawing.Imaging;
     using System.Runtime.CompilerServices;
 
-    internal struct Box
+    internal static class Data
     {
-        public int R0 { get; set; }
-        public int R1 { get; set; }
-        public int G0 { get; set; }
-        public int G1 { get; set; }
-        public int B0 { get; set; }
-        public int B1 { get; set; }
-        public int A0 { get; set; }
-        public int A1 { get; set; }
-        public int Volume { get; set; }
-        public void Clear()
+        internal struct Box
         {
-            this.R0 = 0;
-            this.R1 = 0;
-            this.G0 = 0;
-            this.G0 = 0;
-            this.B0 = 0;
-            this.B0 = 0;
-            this.A0 = 0;
-            this.A1 = 0;
-            this.Volume = 0;
+            public int R0;
+            public int R1;
+            public int G0;
+            public int G1;
+            public int B0;
+            public int B1;
+            public int A0;
+            public int A1;
+            public int Volume;
+            public float vv;
         }
-    }
 
-    public static class Data
-    {
-        public struct Volume
+        internal struct Volume
         {
             public int Vol;
             public int VolumeR;
@@ -42,7 +31,17 @@ namespace WuQuantNet
             public int VolumeA;
             public float Volume2;
         }
+        internal struct Area
+        {
+            public int Are;
+            public int AreaR;
+            public int AreaG;
+            public int AreaB;
+            public int AreaA;
+            public float Area2;
+        }
     }
+
     /// <summary>
     /// A Wu's color quantizer with alpha channel.
     /// </summary>
@@ -55,153 +54,62 @@ namespace WuQuantNet
     /// </remarks>
     public class WuQuant
     {
-        /// <summary>
-        /// Maximum supported colors
-        /// </summary>
         private const int MAXCOLORS = 256;
-
-        /// <summary>
-        /// The index bits.
-        /// </summary>
-        private const int IndexBits = 6;
-
-        /// <summary>
-        /// The index alpha bits.
-        /// </summary>
-        private const int IndexAlphaBits = 3;
-
-        /// <summary>
-        /// The index count.
-        /// </summary>
-        private const int IndexCount = (1 << WuQuant.IndexBits) + 1;
-
-        /// <summary>
-        /// The index alpha count.
-        /// </summary>
-        private const int IndexAlphaCount = (1 << WuQuant.IndexAlphaBits) + 1;
-
-        /// <summary>
-        /// IndexCount * IndexAlphaCount
-        /// </summary>
-        private const int WorkArraySize = WuQuant.IndexCount * WuQuant.IndexAlphaCount;
-
-        /// <summary>
-        /// The table length.
-        /// </summary>
-        private const int TableLength = WuQuant.IndexCount * WuQuant.IndexCount * WuQuant.IndexCount * WuQuant.IndexAlphaCount;
+        private const int INDEXBITS = 6;
+        private const int INDEXALPHABITS = 3;
+        private const int INDEXCOUNT = (1 << WuQuant.INDEXBITS) + 1;
+        private const int INDEXALPHACOUNT = (1 << WuQuant.INDEXALPHABITS) + 1;
+        private const int WORKARRAYSIZE = WuQuant.INDEXCOUNT * WuQuant.INDEXALPHACOUNT;
+        private const int TABLELENGTH = WuQuant.INDEXCOUNT * WuQuant.INDEXCOUNT * WuQuant.INDEXCOUNT * WuQuant.INDEXALPHACOUNT;
 
         /// <summary>
         /// Moment of <c>P(c)</c>.
         /// </summary>
-        private readonly int[] vwt = new int[WuQuant.TableLength];
+        private readonly int[] vwt = new int[WuQuant.TABLELENGTH];
 
         /// <summary>
         /// Moment of <c>r*P(c)</c>.
         /// </summary>
-        private readonly int[] vmr = new int[WuQuant.TableLength];
+        private readonly int[] vmr = new int[WuQuant.TABLELENGTH];
 
         /// <summary>
         /// Moment of <c>g*P(c)</c>.
         /// </summary>
-        private readonly int[] vmg = new int[WuQuant.TableLength];
+        private readonly int[] vmg = new int[WuQuant.TABLELENGTH];
 
         /// <summary>
         /// Moment of <c>b*P(c)</c>.
         /// </summary>
-        private readonly int[] vmb = new int[WuQuant.TableLength];
+        private readonly int[] vmb = new int[WuQuant.TABLELENGTH];
 
         /// <summary>
         /// Moment of <c>a*P(c)</c>.
         /// </summary>
-        private readonly int[] vma = new int[WuQuant.TableLength];
+        private readonly int[] vma = new int[WuQuant.TABLELENGTH];
 
         /// <summary>
         /// Moment of <c>c^2*P(c)</c>.
         /// </summary>
-        private readonly float[] m2 = new float[WuQuant.TableLength];
+        private readonly float[] m2 = new float[WuQuant.TABLELENGTH];
 
         /// <summary>
         /// Color space tag.
         /// </summary>
-        private readonly byte[] tag = new byte[WuQuant.TableLength];
-
-        #region Temporary Arrays for GetMoments3D
-        /// <summary>
-        /// Temporary Array Data used in Get3DMoments()
-        /// </summary>
-        private readonly Data.Volume[] volume = new Data.Volume[WuQuant.WorkArraySize];
+        private readonly byte[] tag = new byte[WuQuant.TABLELENGTH];
 
 
-        /// <summary>
-        /// Temporary Array Data used in Get3DMoments()
-        /// </summary>
-        /*private readonly int[] volume = new int[WuAlphaColorQuantizer.WorkArraySize];
-
-        /// <summary>
-        /// Temporary Array Data used in Get3DMoments()
-        /// </summary>
-        private readonly int[] volumeR = new int[WuAlphaColorQuantizer.WorkArraySize];
-
-        /// <summary>
-        /// Temporary Array Data used in Get3DMoments()
-        /// </summary>
-        private readonly int[] volumeG = new int[WuAlphaColorQuantizer.WorkArraySize];
-
-        /// <summary>
-        /// Temporary Array Data used in Get3DMoments()
-        /// </summary>
-        private readonly int[] volumeB = new int[WuAlphaColorQuantizer.WorkArraySize];
-
-        /// <summary>
-        /// Temporary Array Data used in Get3DMoments()
-        /// </summary>
-        private readonly int[] volumeA = new int[WuAlphaColorQuantizer.WorkArraySize];
-
-        /// <summary>
-        /// Temporary Array Data used in Get3DMoments()
-        /// </summary>
-        private readonly float[] volume2 = new float[WuAlphaColorQuantizer.WorkArraySize];*/
-
-        /// <summary>
-        /// Temporary Array Data used in Get3DMoments()
-        /// </summary>
-        private readonly int[] area = new int[WuQuant.IndexAlphaCount];
-
-        /// <summary>
-        /// Temporary Array Data used in Get3DMoments()
-        /// </summary>
-        private readonly int[] areaR = new int[WuQuant.IndexAlphaCount];
-
-        /// <summary>
-        /// Temporary Array Data used in Get3DMoments()
-        /// </summary>
-        private readonly int[] areaG = new int[WuQuant.IndexAlphaCount];
-
-        /// <summary>
-        /// Temporary Array Data used in Get3DMoments()
-        /// </summary>
-        private readonly int[] areaB = new int[WuQuant.IndexAlphaCount];
-
-        /// <summary>
-        /// Temporary Array Data used in Get3DMoments()
-        /// </summary>
-        private readonly int[] areaA = new int[WuQuant.IndexAlphaCount];
-
-        /// <summary>
-        /// Temporary Array Data used in Get3DMoments()
-        /// </summary>
-        private readonly float[] area2 = new float[WuQuant.IndexAlphaCount];
-        #endregion
+        private readonly Data.Volume[] volume = new Data.Volume[WORKARRAYSIZE];
+        private readonly Data.Area[] area = new Data.Area[INDEXALPHACOUNT];
 
         /// <summary>
         /// Temporary Data in BuildCube()
         /// </summary>
-        private readonly float[] vv = new float[WuQuant.MAXCOLORS];
+        //private readonly float[] vv = new float[WuQuant.MAXCOLORS];
 
         /// <summary>
         /// Temporary Data
         /// </summary>
-        private readonly Box[] cube = new Box[WuQuant.MAXCOLORS];
+        private readonly Data.Box[] cube = new Data.Box[WuQuant.MAXCOLORS];
 
         /// <summary>
         /// Quantizes an image.
@@ -353,13 +261,13 @@ namespace WuQuantNet
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static int GetIndex(int r, int g, int b, int a)
         {
-            return (r << ((WuQuant.IndexBits * 2) + WuQuant.IndexAlphaBits))
-                + (r << (WuQuant.IndexBits + WuQuant.IndexAlphaBits + 1))
-                + (g << (WuQuant.IndexBits + WuQuant.IndexAlphaBits))
-                + (r << (WuQuant.IndexBits * 2))
-                + (r << (WuQuant.IndexBits + 1))
-                + (g << WuQuant.IndexBits)
-                + ((r + g + b) << WuQuant.IndexAlphaBits)
+            return (r << ((INDEXBITS * 2) + INDEXALPHABITS))
+                + (r << (INDEXBITS + INDEXALPHABITS + 1))
+                + (g << (INDEXBITS + INDEXALPHABITS))
+                + (r << (INDEXBITS * 2))
+                + (r << (INDEXBITS + 1))
+                + (g << INDEXBITS)
+                + ((r + g + b) << INDEXALPHABITS)
                 + r + g + b + a;
         }
 
@@ -370,24 +278,24 @@ namespace WuQuantNet
         /// <param name="moment">The moment.</param>
         /// <returns>The result.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static float Volume(ref Box cube, int[] moment)
+        private static float Volume(ref Data.Box cube, int[] moment)
         {
-            return (float)(moment[WuQuant.GetIndex(cube.R1, cube.G1, cube.B1, cube.A1)]
-                - moment[WuQuant.GetIndex(cube.R1, cube.G1, cube.B1, cube.A0)]
-                - moment[WuQuant.GetIndex(cube.R1, cube.G1, cube.B0, cube.A1)]
-                + moment[WuQuant.GetIndex(cube.R1, cube.G1, cube.B0, cube.A0)]
-                - moment[WuQuant.GetIndex(cube.R1, cube.G0, cube.B1, cube.A1)]
-                + moment[WuQuant.GetIndex(cube.R1, cube.G0, cube.B1, cube.A0)]
-                + moment[WuQuant.GetIndex(cube.R1, cube.G0, cube.B0, cube.A1)]
-                - moment[WuQuant.GetIndex(cube.R1, cube.G0, cube.B0, cube.A0)]
-                - moment[WuQuant.GetIndex(cube.R0, cube.G1, cube.B1, cube.A1)]
-                + moment[WuQuant.GetIndex(cube.R0, cube.G1, cube.B1, cube.A0)]
-                + moment[WuQuant.GetIndex(cube.R0, cube.G1, cube.B0, cube.A1)]
-                - moment[WuQuant.GetIndex(cube.R0, cube.G1, cube.B0, cube.A0)]
-                + moment[WuQuant.GetIndex(cube.R0, cube.G0, cube.B1, cube.A1)]
-                - moment[WuQuant.GetIndex(cube.R0, cube.G0, cube.B1, cube.A0)]
-                - moment[WuQuant.GetIndex(cube.R0, cube.G0, cube.B0, cube.A1)]
-                + moment[WuQuant.GetIndex(cube.R0, cube.G0, cube.B0, cube.A0)]);
+            return (float)(moment[GetIndex(cube.R1, cube.G1, cube.B1, cube.A1)]
+                - moment[GetIndex(cube.R1, cube.G1, cube.B1, cube.A0)]
+                - moment[GetIndex(cube.R1, cube.G1, cube.B0, cube.A1)]
+                + moment[GetIndex(cube.R1, cube.G1, cube.B0, cube.A0)]
+                - moment[GetIndex(cube.R1, cube.G0, cube.B1, cube.A1)]
+                + moment[GetIndex(cube.R1, cube.G0, cube.B1, cube.A0)]
+                + moment[GetIndex(cube.R1, cube.G0, cube.B0, cube.A1)]
+                - moment[GetIndex(cube.R1, cube.G0, cube.B0, cube.A0)]
+                - moment[GetIndex(cube.R0, cube.G1, cube.B1, cube.A1)]
+                + moment[GetIndex(cube.R0, cube.G1, cube.B1, cube.A0)]
+                + moment[GetIndex(cube.R0, cube.G1, cube.B0, cube.A1)]
+                - moment[GetIndex(cube.R0, cube.G1, cube.B0, cube.A0)]
+                + moment[GetIndex(cube.R0, cube.G0, cube.B1, cube.A1)]
+                - moment[GetIndex(cube.R0, cube.G0, cube.B1, cube.A0)]
+                - moment[GetIndex(cube.R0, cube.G0, cube.B0, cube.A1)]
+                + moment[GetIndex(cube.R0, cube.G0, cube.B0, cube.A0)]);
         }
 
         /// <summary>
@@ -398,7 +306,7 @@ namespace WuQuantNet
         /// <param name="moment">The moment.</param>
         /// <returns>The result.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int Bottom(ref Box cube, int direction, int[] moment)
+        private static int Bottom(ref Data.Box cube, int direction, int[] moment)
         {
             switch (direction)
             {
@@ -460,7 +368,7 @@ namespace WuQuantNet
         /// <param name="moment">The moment.</param>
         /// <returns>The result.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int Top(ref Box cube, int direction, int position, int[] moment)
+        private static int Top(ref Data.Box cube, int direction, int position, int[] moment)
         {
             switch (direction)
             {
@@ -518,42 +426,13 @@ namespace WuQuantNet
         /// </summary>
         private void Clear()
         {
-            Array.Clear(this.vwt, 0, WuQuant.TableLength);
-            Array.Clear(this.vmr, 0, WuQuant.TableLength);
-            Array.Clear(this.vmg, 0, WuQuant.TableLength);
-            Array.Clear(this.vmb, 0, WuQuant.TableLength);
-            Array.Clear(this.vma, 0, WuQuant.TableLength);
-            Array.Clear(this.m2, 0, WuQuant.TableLength);
-            Array.Clear(this.tag, 0, WuQuant.TableLength);
-        }
-
-        /// <summary>
-        /// Builds a 3-D color histogram of <c>counts, r/g/b, c^2</c>.
-        /// </summary>
-        /// <param name="image">The image.</param>
-        private void Build3DHistogram(byte[] image)
-        {
-            for (int i = 0; i < image.Length; i += 4)
-            {
-                int a = image[i + 3];
-                int r = image[i + 2];
-                int g = image[i + 1];
-                int b = image[i];
-
-                int inr = r >> (8 - WuQuant.IndexBits);
-                int ing = g >> (8 - WuQuant.IndexBits);
-                int inb = b >> (8 - WuQuant.IndexBits);
-                int ina = a >> (8 - WuQuant.IndexAlphaBits);
-
-                int ind = WuQuant.GetIndex(inr + 1, ing + 1, inb + 1, ina + 1);
-
-                this.vwt[ind]++;
-                this.vmr[ind] += r;
-                this.vmg[ind] += g;
-                this.vmb[ind] += b;
-                this.vma[ind] += a;
-                this.m2[ind] += (r * r) + (g * g) + (b * b) + (a * a);
-            }
+            Array.Clear(vwt, 0, TABLELENGTH);
+            Array.Clear(vmr, 0, TABLELENGTH);
+            Array.Clear(vmg, 0, TABLELENGTH);
+            Array.Clear(vmb, 0, TABLELENGTH);
+            Array.Clear(vma, 0, TABLELENGTH);
+            Array.Clear(m2, 0, TABLELENGTH);
+            Array.Clear(tag, 0, TABLELENGTH);
         }
 
         /// <summary>
@@ -574,19 +453,19 @@ namespace WuQuantNet
                 int g = (int)((pix & 0x0000FF00) >> 8);
                 int b = (int)(pix & 0x000000FF);
 
-                int inr = r >> (8 - WuQuant.IndexBits);
-                int ing = g >> (8 - WuQuant.IndexBits);
-                int inb = b >> (8 - WuQuant.IndexBits);
-                int ina = a >> (8 - WuQuant.IndexAlphaBits);
+                int inr = r >> (8 - INDEXBITS);
+                int ing = g >> (8 - INDEXBITS);
+                int inb = b >> (8 - INDEXBITS);
+                int ina = a >> (8 - INDEXALPHABITS);
 
-                int ind = WuQuant.GetIndex((int)inr + 1, (int)ing + 1, (int)inb + 1, (int)ina + 1);
+                int ind = GetIndex(inr + 1, ing + 1, inb + 1, ina + 1);
 
-                this.vwt[ind]++;
-                this.vmr[ind] += r;
-                this.vmg[ind] += g;
-                this.vmb[ind] += b;
-                this.vma[ind] += a;
-                this.m2[ind] += (r * r) + (g * g) + (b * b) + (a * a);
+                vwt[ind]++;
+                vmr[ind] += r;
+                vmg[ind] += g;
+                vmb[ind] += b;
+                vma[ind] += a;
+                m2[ind] += (r * r) + (g * g) + (b * b) + (a * a);
             }
         }
 
@@ -596,26 +475,15 @@ namespace WuQuantNet
         /// </summary>
         private void Get3DMoments()
         {
-            for (int r = 1; r < WuQuant.IndexCount; r++)
+            for (int r = 1; r < INDEXCOUNT; r++)
             {
-                /*Array.Clear(this.volume, 0, WuAlphaColorQuantizer.IndexCount * WuAlphaColorQuantizer.IndexAlphaCount);
-                Array.Clear(this.volumeR, 0, WuAlphaColorQuantizer.IndexCount * WuAlphaColorQuantizer.IndexAlphaCount);
-                Array.Clear(this.volumeG, 0, WuAlphaColorQuantizer.IndexCount * WuAlphaColorQuantizer.IndexAlphaCount);
-                Array.Clear(this.volumeB, 0, WuAlphaColorQuantizer.IndexCount * WuAlphaColorQuantizer.IndexAlphaCount);
-                Array.Clear(this.volumeA, 0, WuAlphaColorQuantizer.IndexCount * WuAlphaColorQuantizer.IndexAlphaCount);
-                Array.Clear(this.volume2, 0, WuAlphaColorQuantizer.IndexCount * WuAlphaColorQuantizer.IndexAlphaCount);*/
-                Array.Clear(this.volume, 0, this.volume.Length);
+                Array.Clear(volume, 0, volume.Length);
 
-                for (int g = 1; g < WuQuant.IndexCount; g++)
+                for (int g = 1; g < INDEXCOUNT; g++)
                 {
-                    Array.Clear(this.area, 0, WuQuant.IndexAlphaCount);
-                    Array.Clear(this.areaR, 0, WuQuant.IndexAlphaCount);
-                    Array.Clear(this.areaG, 0, WuQuant.IndexAlphaCount);
-                    Array.Clear(this.areaB, 0, WuQuant.IndexAlphaCount);
-                    Array.Clear(this.areaA, 0, WuQuant.IndexAlphaCount);
-                    Array.Clear(this.area2, 0, WuQuant.IndexAlphaCount);
+                    Array.Clear(area, 0, area.Length);
 
-                    for (int b = 1; b < WuQuant.IndexCount; b++)
+                    for (int b = 1; b < INDEXCOUNT; b++)
                     {
                         int line = 0;
                         int lineR = 0;
@@ -624,41 +492,41 @@ namespace WuQuantNet
                         int lineA = 0;
                         float line2 = 0;
 
-                        for (int a = 1; a < WuQuant.IndexAlphaCount; a++)
+                        for (int a = 1; a < INDEXALPHACOUNT; a++)
                         {
-                            int ind1 = WuQuant.GetIndex(r, g, b, a);
+                            int ind1 = GetIndex(r, g, b, a);
 
-                            line += this.vwt[ind1];
-                            lineR += this.vmr[ind1];
-                            lineG += this.vmg[ind1];
-                            lineB += this.vmb[ind1];
-                            lineA += this.vma[ind1];
-                            line2 += this.m2[ind1];
+                            line += vwt[ind1];
+                            lineR += vmr[ind1];
+                            lineG += vmg[ind1];
+                            lineB += vmb[ind1];
+                            lineA += vma[ind1];
+                            line2 += m2[ind1];
 
-                            this.area[a] += line;
-                            this.areaR[a] += lineR;
-                            this.areaG[a] += lineG;
-                            this.areaB[a] += lineB;
-                            this.areaA[a] += lineA;
-                            this.area2[a] += line2;
+                            area[a].Are += line;
+                            area[a].AreaR += lineR;
+                            area[a].AreaG += lineG;
+                            area[a].AreaB += lineB;
+                            area[a].AreaA += lineA;
+                            area[a].Area2 += line2;
 
-                            int inv = (b * WuQuant.IndexAlphaCount) + a;
+                            int inv = (b * INDEXALPHACOUNT) + a;
 
-                            this.volume[inv].Vol += this.area[a];
-                            this.volume[inv].VolumeR += this.areaR[a];
-                            this.volume[inv].VolumeG += this.areaG[a];
-                            this.volume[inv].VolumeB += this.areaB[a];
-                            this.volume[inv].VolumeA += this.areaA[a];
-                            this.volume[inv].Volume2 += this.area2[a];
+                            volume[inv].Vol += area[a].Are;
+                            volume[inv].VolumeR += area[a].AreaR;
+                            volume[inv].VolumeG += area[a].AreaG;
+                            volume[inv].VolumeB += area[a].AreaB;
+                            volume[inv].VolumeA += area[a].AreaA;
+                            volume[inv].Volume2 += area[a].Area2;
 
-                            int ind2 = ind1 - WuQuant.GetIndex(1, 0, 0, 0);
+                            int ind2 = ind1 - GetIndex(1, 0, 0, 0);
 
-                            this.vwt[ind1] = this.vwt[ind2] + this.volume[inv].Vol;
-                            this.vmr[ind1] = this.vmr[ind2] + this.volume[inv].VolumeR;
-                            this.vmg[ind1] = this.vmg[ind2] + this.volume[inv].VolumeG;
-                            this.vmb[ind1] = this.vmb[ind2] + this.volume[inv].VolumeB;
-                            this.vma[ind1] = this.vma[ind2] + this.volume[inv].VolumeA;
-                            this.m2[ind1] = this.m2[ind2] + this.volume[inv].Volume2;
+                            vwt[ind1] = vwt[ind2] + volume[inv].Vol;
+                            vmr[ind1] = vmr[ind2] + volume[inv].VolumeR;
+                            vmg[ind1] = vmg[ind2] + volume[inv].VolumeG;
+                            vmb[ind1] = vmb[ind2] + volume[inv].VolumeB;
+                            vma[ind1] = vma[ind2] + volume[inv].VolumeA;
+                            m2[ind1] = m2[ind2] + volume[inv].Volume2;
                         }
                     }
                 }
@@ -670,7 +538,7 @@ namespace WuQuantNet
         /// </summary>
         /// <param name="c">The cube.</param>
         /// <returns>The result.</returns>
-        private float Variance(ref Box c)
+        private float Variance(ref Data.Box c)
         {
             float dr = WuQuant.Volume(ref c, this.vmr);
             float dg = WuQuant.Volume(ref c, this.vmg);
@@ -716,7 +584,7 @@ namespace WuQuantNet
         /// <param name="wholeA">The whole alpha.</param>
         /// <param name="wholeW">The whole weight.</param>
         /// <returns>The result.</returns>
-        private float Maximize(ref Box c, int direction, int first, int last, out int cut, float wholeR, float wholeG, float wholeB, float wholeA, float wholeW)
+        private float Maximize(ref Data.Box c, int direction, int first, int last, out int cut, float wholeR, float wholeG, float wholeB, float wholeA, float wholeW)
         {
             int baseR = Bottom(ref c, direction, this.vmr);
             int baseG = WuQuant.Bottom(ref c, direction, this.vmg);
@@ -771,7 +639,7 @@ namespace WuQuantNet
         /// <param name="set1">The first set.</param>
         /// <param name="set2">The second set.</param>
         /// <returns>Returns a value indicating whether the box has been split.</returns>
-        private bool Cut(ref Box set1, ref Box set2)
+        private bool Cut(ref Data.Box set1, ref Data.Box set2)
         {
             float wholeR = WuQuant.Volume(ref set1, this.vmr);
             float wholeG = WuQuant.Volume(ref set1, this.vmg);
@@ -864,21 +732,13 @@ namespace WuQuantNet
         /// </summary>
         /// <param name="c">The cube.</param>
         /// <param name="label">A label.</param>
-        private void Mark(ref Box c, byte label)
+        private void Mark(ref Data.Box c, byte label)
         {
             for (int r = c.R0 + 1; r <= c.R1; r++)
-            {
                 for (int g = c.G0 + 1; g <= c.G1; g++)
-                {
                     for (int b = c.B0 + 1; b <= c.B1; b++)
-                    {
                         for (int a = c.A0 + 1; a <= c.A1; a++)
-                        {
-                            this.tag[WuQuant.GetIndex(r, g, b, a)] = label;
-                        }
-                    }
-                }
-            }
+                            tag[GetIndex(r, g, b, a)] = label;
         }
 
         /// <summary>
@@ -887,41 +747,35 @@ namespace WuQuantNet
         /// <param name="colorCount">The color count.</param>
         private void BuildCube(ref int colorCount)
         {
-            for (int i = 0; i < colorCount; i++)
-            {
-                this.cube[i].Clear();
-            }
+            Array.Clear(cube, 0, colorCount);
 
-            // clear temporary vv memory
-            Array.Clear(this.vv, 0, this.vv.Length);
-
-            this.cube[0].R0 = this.cube[0].G0 = this.cube[0].B0 = this.cube[0].A0 = 0;
-            this.cube[0].R1 = this.cube[0].G1 = this.cube[0].B1 = WuQuant.IndexCount - 1;
-            this.cube[0].A1 = WuQuant.IndexAlphaCount - 1;
+            cube[0].R0 = cube[0].G0 = cube[0].B0 = cube[0].A0 = 0;
+            cube[0].R1 = cube[0].G1 = cube[0].B1 = INDEXCOUNT - 1;
+            cube[0].A1 = INDEXALPHACOUNT - 1;
 
             int next = 0;
 
             for (int i = 1; i < colorCount; i++)
             {
-                if (this.Cut(ref this.cube[next], ref this.cube[i]))
+                if (Cut(ref cube[next], ref cube[i]))
                 {
-                    this.vv[next] = this.cube[next].Volume > 1 ? this.Variance(ref this.cube[next]) : 0.0f;
-                    this.vv[i] = this.cube[i].Volume > 1 ? this.Variance(ref this.cube[i]) : 0.0f;
+                    cube[next].vv = cube[next].Volume > 1 ? Variance(ref cube[next]) : 0.0f;
+                    cube[i].vv = cube[i].Volume > 1 ? Variance(ref cube[i]) : 0.0f;
                 }
                 else
                 {
-                    this.vv[next] = 0.0f;
+                    cube[next].vv = 0.0f;
                     i--;
                 }
 
                 next = 0;
 
-                float temp = this.vv[0];
+                float temp = cube[0].vv;
                 for (int k = 1; k <= i; k++)
                 {
-                    if (this.vv[k] > temp)
+                    if (cube[k].vv > temp)
                     {
-                        temp = this.vv[k];
+                        temp = cube[k].vv;
                         next = k;
                     }
                 }
@@ -979,10 +833,10 @@ namespace WuQuantNet
                 {
                     uint pix = image[0];
 
-                    uint a = ((pix & 0xFF000000) >> 24) >> (8 - WuQuant.IndexAlphaBits);
-                    uint r = ((pix & 0x00FF0000) >> 16) >> (8 - WuQuant.IndexBits);
-                    uint g = ((pix & 0x0000FF00) >> 8) >> (8 - WuQuant.IndexBits);
-                    uint b = (pix & 0x000000FF) >> (8 - WuQuant.IndexBits);
+                    uint a = ((pix & 0xFF000000) >> 24) >> (8 - WuQuant.INDEXALPHABITS);
+                    uint r = ((pix & 0x00FF0000) >> 16) >> (8 - WuQuant.INDEXBITS);
+                    uint g = ((pix & 0x0000FF00) >> 8) >> (8 - WuQuant.INDEXBITS);
+                    uint b = (pix & 0x000000FF) >> (8 - WuQuant.INDEXBITS);
 
                     int ind = WuQuant.GetIndex((int)r + 1, (int)g + 1, (int)b + 1, (int)a + 1);
 
@@ -1004,6 +858,5 @@ namespace WuQuantNet
 
             return palette;
         }
-
     }
 }
