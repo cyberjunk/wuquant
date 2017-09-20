@@ -100,15 +100,6 @@ namespace WuQuantNet
 
         private readonly Data.Volume[] volume = new Data.Volume[WORKARRAYSIZE];
         private readonly Data.Area[] area = new Data.Area[INDEXALPHACOUNT];
-
-        /// <summary>
-        /// Temporary Data in BuildCube()
-        /// </summary>
-        //private readonly float[] vv = new float[WuQuant.MAXCOLORS];
-
-        /// <summary>
-        /// Temporary Data
-        /// </summary>
         private readonly Data.Box[] cube = new Data.Box[WuQuant.MAXCOLORS];
 
         /// <summary>
