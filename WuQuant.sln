@@ -1,0 +1,67 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WuQuant", "WuQuant\WuQuant.vcxproj", "{31CD3032-1A51-4656-9038-C04850D15FA5}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestApp", "TestApp\TestApp.vcxproj", "{614BF694-212E-4EF5-BBE5-4138EC20C0E9}"
+	ProjectSection(ProjectDependencies) = postProject
+		{31CD3032-1A51-4656-9038-C04850D15FA5} = {31CD3032-1A51-4656-9038-C04850D15FA5}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WuQuantWrap", "WuQuantWrap\WuQuantWrap.csproj", "{9C96C669-983B-41AD-BE6D-64F486C2A59B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{31CD3032-1A51-4656-9038-C04850D15FA5} = {31CD3032-1A51-4656-9038-C04850D15FA5}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WuQuantWrapTest", "WuQuantWrapTest\WuQuantWrapTest.csproj", "{E0613731-D24F-458C-888B-AE3A7A618DCF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{31CD3032-1A51-4656-9038-C04850D15FA5} = {31CD3032-1A51-4656-9038-C04850D15FA5}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{31CD3032-1A51-4656-9038-C04850D15FA5}.Debug|x64.ActiveCfg = Debug|x64
+		{31CD3032-1A51-4656-9038-C04850D15FA5}.Debug|x64.Build.0 = Debug|x64
+		{31CD3032-1A51-4656-9038-C04850D15FA5}.Debug|x86.ActiveCfg = Debug|Win32
+		{31CD3032-1A51-4656-9038-C04850D15FA5}.Debug|x86.Build.0 = Debug|Win32
+		{31CD3032-1A51-4656-9038-C04850D15FA5}.Release|x64.ActiveCfg = Release|x64
+		{31CD3032-1A51-4656-9038-C04850D15FA5}.Release|x64.Build.0 = Release|x64
+		{31CD3032-1A51-4656-9038-C04850D15FA5}.Release|x86.ActiveCfg = Release|Win32
+		{31CD3032-1A51-4656-9038-C04850D15FA5}.Release|x86.Build.0 = Release|Win32
+		{614BF694-212E-4EF5-BBE5-4138EC20C0E9}.Debug|x64.ActiveCfg = Debug|x64
+		{614BF694-212E-4EF5-BBE5-4138EC20C0E9}.Debug|x64.Build.0 = Debug|x64
+		{614BF694-212E-4EF5-BBE5-4138EC20C0E9}.Debug|x86.ActiveCfg = Debug|Win32
+		{614BF694-212E-4EF5-BBE5-4138EC20C0E9}.Debug|x86.Build.0 = Debug|Win32
+		{614BF694-212E-4EF5-BBE5-4138EC20C0E9}.Release|x64.ActiveCfg = Release|x64
+		{614BF694-212E-4EF5-BBE5-4138EC20C0E9}.Release|x64.Build.0 = Release|x64
+		{614BF694-212E-4EF5-BBE5-4138EC20C0E9}.Release|x86.ActiveCfg = Release|Win32
+		{614BF694-212E-4EF5-BBE5-4138EC20C0E9}.Release|x86.Build.0 = Release|Win32
+		{9C96C669-983B-41AD-BE6D-64F486C2A59B}.Debug|x64.ActiveCfg = Debug|x64
+		{9C96C669-983B-41AD-BE6D-64F486C2A59B}.Debug|x64.Build.0 = Debug|x64
+		{9C96C669-983B-41AD-BE6D-64F486C2A59B}.Debug|x86.ActiveCfg = Debug|x86
+		{9C96C669-983B-41AD-BE6D-64F486C2A59B}.Debug|x86.Build.0 = Debug|x86
+		{9C96C669-983B-41AD-BE6D-64F486C2A59B}.Release|x64.ActiveCfg = Release|x64
+		{9C96C669-983B-41AD-BE6D-64F486C2A59B}.Release|x64.Build.0 = Release|x64
+		{9C96C669-983B-41AD-BE6D-64F486C2A59B}.Release|x86.ActiveCfg = Release|x86
+		{9C96C669-983B-41AD-BE6D-64F486C2A59B}.Release|x86.Build.0 = Release|x86
+		{E0613731-D24F-458C-888B-AE3A7A618DCF}.Debug|x64.ActiveCfg = Debug|x64
+		{E0613731-D24F-458C-888B-AE3A7A618DCF}.Debug|x64.Build.0 = Debug|x64
+		{E0613731-D24F-458C-888B-AE3A7A618DCF}.Debug|x86.ActiveCfg = Debug|x86
+		{E0613731-D24F-458C-888B-AE3A7A618DCF}.Debug|x86.Build.0 = Debug|x86
+		{E0613731-D24F-458C-888B-AE3A7A618DCF}.Release|x64.ActiveCfg = Release|x64
+		{E0613731-D24F-458C-888B-AE3A7A618DCF}.Release|x64.Build.0 = Release|x64
+		{E0613731-D24F-458C-888B-AE3A7A618DCF}.Release|x86.ActiveCfg = Release|x86
+		{E0613731-D24F-458C-888B-AE3A7A618DCF}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
