@@ -1,7 +1,6 @@
 
 #include <stdio.h>
-#include <tchar.h>
-#include <SDKDDKVer.h>
+#include <string.h>
 #include <WuQuant.h>
 
 #define WIDTH 2
@@ -35,6 +34,8 @@ int main()
    Quantize(quantizer, img, pal, &colors, WIDTH, HEIGHT, pixels, 0);
    Destroy(quantizer);
    
+   printf("SUCCESS\n");
+
    while (1) {}
    return 0;
 }

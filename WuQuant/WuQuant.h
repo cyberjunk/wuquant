@@ -8,6 +8,7 @@
 //  GCC
 #define EXPORT __attribute__((visibility("default")))
 #define IMPORT
+#define __forceinline __attribute__((always_inline))
 #else
 //  do nothing and hope for the best?
 #define EXPORT
