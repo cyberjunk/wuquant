@@ -4,7 +4,7 @@
 #include <string.h>
 #include "WuQuant.h"
 
-__forceinline static int GetIndex(int r, int g, int b, int a)
+__forceinline static int GetIndex(const int r, const int g, const int b, const int a)
 {
    return (r << ((INDEXBITS * 2) + INDEXALPHABITS))
       + (r << (INDEXBITS + INDEXALPHABITS + 1))
@@ -16,27 +16,7 @@ __forceinline static int GetIndex(int r, int g, int b, int a)
       + r + g + b + a;
 }
 
-__forceinline static float Volume(Box* cube, int* moment)
-{
-   return (float)(moment[GetIndex(cube->R1, cube->G1, cube->B1, cube->A1)]
-      - moment[GetIndex(cube->R1, cube->G1, cube->B1, cube->A0)]
-      - moment[GetIndex(cube->R1, cube->G1, cube->B0, cube->A1)]
-      + moment[GetIndex(cube->R1, cube->G1, cube->B0, cube->A0)]
-      - moment[GetIndex(cube->R1, cube->G0, cube->B1, cube->A1)]
-      + moment[GetIndex(cube->R1, cube->G0, cube->B1, cube->A0)]
-      + moment[GetIndex(cube->R1, cube->G0, cube->B0, cube->A1)]
-      - moment[GetIndex(cube->R1, cube->G0, cube->B0, cube->A0)]
-      - moment[GetIndex(cube->R0, cube->G1, cube->B1, cube->A1)]
-      + moment[GetIndex(cube->R0, cube->G1, cube->B1, cube->A0)]
-      + moment[GetIndex(cube->R0, cube->G1, cube->B0, cube->A1)]
-      - moment[GetIndex(cube->R0, cube->G1, cube->B0, cube->A0)]
-      + moment[GetIndex(cube->R0, cube->G0, cube->B1, cube->A1)]
-      - moment[GetIndex(cube->R0, cube->G0, cube->B1, cube->A0)]
-      - moment[GetIndex(cube->R0, cube->G0, cube->B0, cube->A1)]
-      + moment[GetIndex(cube->R0, cube->G0, cube->B0, cube->A0)]);
-}
-
-__forceinline static int Bottom(Box* cube, int direction, int* moment)
+__forceinline static int Bottom(const Box* cube, const int direction, const int* moment)
 {
    switch (direction)
    {
@@ -89,7 +69,7 @@ __forceinline static int Bottom(Box* cube, int direction, int* moment)
    }
 }
 
-__forceinline static int Top(Box* cube, int direction, int position, int* moment)
+__forceinline static int Top(const Box* cube, const int direction, const int position, const int* moment)
 {
    switch (direction)
    {
@@ -142,7 +122,28 @@ __forceinline static int Top(Box* cube, int direction, int position, int* moment
    }
 }
 
-__forceinline static float Variance(Quantizer* quantizer, Box* cube)
+__forceinline static float Volume(const Box* cube, const int* moment)
+{
+   return (float)(
+      moment[GetIndex(cube->R1, cube->G1, cube->B1, cube->A1)]
+      - moment[GetIndex(cube->R1, cube->G1, cube->B1, cube->A0)]
+      - moment[GetIndex(cube->R1, cube->G1, cube->B0, cube->A1)]
+      + moment[GetIndex(cube->R1, cube->G1, cube->B0, cube->A0)]
+      - moment[GetIndex(cube->R1, cube->G0, cube->B1, cube->A1)]
+      + moment[GetIndex(cube->R1, cube->G0, cube->B1, cube->A0)]
+      + moment[GetIndex(cube->R1, cube->G0, cube->B0, cube->A1)]
+      - moment[GetIndex(cube->R1, cube->G0, cube->B0, cube->A0)]
+      - moment[GetIndex(cube->R0, cube->G1, cube->B1, cube->A1)]
+      + moment[GetIndex(cube->R0, cube->G1, cube->B1, cube->A0)]
+      + moment[GetIndex(cube->R0, cube->G1, cube->B0, cube->A1)]
+      - moment[GetIndex(cube->R0, cube->G1, cube->B0, cube->A0)]
+      + moment[GetIndex(cube->R0, cube->G0, cube->B1, cube->A1)]
+      - moment[GetIndex(cube->R0, cube->G0, cube->B1, cube->A0)]
+      - moment[GetIndex(cube->R0, cube->G0, cube->B0, cube->A1)]
+      + moment[GetIndex(cube->R0, cube->G0, cube->B0, cube->A0)]);
+}
+
+__forceinline static float Variance(const Quantizer* quantizer, const Box* cube)
 {
    float dr = Volume(cube, quantizer->vmr);
    float dg = Volume(cube, quantizer->vmg);
@@ -170,120 +171,7 @@ __forceinline static float Variance(Quantizer* quantizer, Box* cube)
    return xx - (((dr * dr) + (dg * dg) + (db * db) + (da * da)) / Volume(cube, quantizer->vwt));
 }
 
-__forceinline static void ClearBox(Box* box)
-{
-   box->R0 = 0;
-   box->R1 = 0;
-   box->G0 = 0;
-   box->G1 = 0;
-   box->B0 = 0;
-   box->B1 = 0;
-   box->A0 = 0;
-   box->A1 = 0;
-   box->Volume = 0;
-}
-
-__forceinline static void Clear(Quantizer* quantizer)
-{
-   memset(quantizer->vwt, 0, sizeof(quantizer->vwt));
-   memset(quantizer->vmr, 0, sizeof(quantizer->vmr));
-   memset(quantizer->vmg, 0, sizeof(quantizer->vmg));
-   memset(quantizer->vmb, 0, sizeof(quantizer->vmb));
-   memset(quantizer->vma, 0, sizeof(quantizer->vma));
-   memset(quantizer->m2, 0, sizeof(quantizer->m2));
-   memset(quantizer->tag, 0, sizeof(quantizer->tag));
-
-   memset(quantizer->cube, 0, sizeof(quantizer->cube));
-}
-
-static void Build3DHistogram(Quantizer* quantizer, unsigned int* image, int width, int height)
-{
-   const int pixels = width * height;
-   for (int i = 0; i < pixels; i++)
-   {
-      unsigned int pix = image[i];
-      unsigned int a = (pix & 0xFF000000) >> 24;
-      unsigned int r = (pix & 0x00FF0000) >> 16;
-      unsigned int g = (pix & 0x0000FF00) >> 8;
-      unsigned int b = pix & 0x000000FF;
-
-      unsigned int inr = r >> (8 - INDEXBITS);
-      unsigned int ing = g >> (8 - INDEXBITS);
-      unsigned int inb = b >> (8 - INDEXBITS);
-      unsigned int ina = a >> (8 - INDEXALPHABITS);
-
-      int ind = GetIndex((int)inr + 1, (int)ing + 1, (int)inb + 1, (int)ina + 1);
-
-      quantizer->vwt[ind]++;
-      quantizer->vmr[ind] += r;
-      quantizer->vmg[ind] += g;
-      quantizer->vmb[ind] += b;
-      quantizer->vma[ind] += a;
-      quantizer->m2[ind] += (r * r) + (g * g) + (b * b) + (a * a);
-   }
-}
-
-static void Get3DMoments(Quantizer* quantizer)
-{
-   for (int r = 1; r < INDEXCOUNT; r++)
-   {
-      memset(quantizer->volume,  0, sizeof(quantizer->volume));
-
-      for (int g = 1; g < INDEXCOUNT; g++)
-      {
-         memset(quantizer->area,  0, sizeof(quantizer->area));
-
-         for (int b = 1; b < INDEXCOUNT; b++)
-         {
-            int line = 0;
-            int lineR = 0;
-            int lineG = 0;
-            int lineB = 0;
-            int lineA = 0;
-            float line2 = 0;
-
-            for (int a = 1; a < INDEXALPHACOUNT; a++)
-            {
-               int ind1 = GetIndex(r, g, b, a);
-
-               line += quantizer->vwt[ind1];
-               lineR += quantizer->vmr[ind1];
-               lineG += quantizer->vmg[ind1];
-               lineB += quantizer->vmb[ind1];
-               lineA += quantizer->vma[ind1];
-               line2 += quantizer->m2[ind1];
-
-               quantizer->area[a].V += line;
-               quantizer->area[a].R += lineR;
-               quantizer->area[a].G += lineG;
-               quantizer->area[a].B += lineB;
-               quantizer->area[a].A += lineA;
-               quantizer->area[a].V2 += line2;
-
-               int inv = (b * INDEXALPHACOUNT) + a;
-
-               quantizer->volume[inv].V += quantizer->area[a].V;
-               quantizer->volume[inv].R += quantizer->area[a].R;
-               quantizer->volume[inv].G += quantizer->area[a].G;
-               quantizer->volume[inv].B += quantizer->area[a].B;
-               quantizer->volume[inv].A += quantizer->area[a].A;
-               quantizer->volume[inv].V2 += quantizer->area[a].V2;
-
-               int ind2 = ind1 - GetIndex(1, 0, 0, 0);
-
-               quantizer->vwt[ind1] = quantizer->vwt[ind2] + quantizer->volume[inv].V;
-               quantizer->vmr[ind1] = quantizer->vmr[ind2] + quantizer->volume[inv].R;
-               quantizer->vmg[ind1] = quantizer->vmg[ind2] + quantizer->volume[inv].G;
-               quantizer->vmb[ind1] = quantizer->vmb[ind2] + quantizer->volume[inv].B;
-               quantizer->vma[ind1] = quantizer->vma[ind2] + quantizer->volume[inv].A;
-               quantizer->m2[ind1] = quantizer->m2[ind2] + quantizer->volume[inv].V2;
-            }
-         }
-      }
-   }
-}
-
-static float Maximize(Quantizer* quantizer, Box* cube, int direction, int first, int last, int* cut, float wholeR, float wholeG, float wholeB, float wholeA, float wholeW)
+__forceinline static float Maximize(Quantizer* quantizer, Box* cube, int direction, int first, int last, int* cut, float wholeR, float wholeG, float wholeB, float wholeA, float wholeW)
 {
    int baseR = Bottom(cube, direction, quantizer->vmr);
    int baseG = Bottom(cube, direction, quantizer->vmg);
@@ -332,7 +220,7 @@ static float Maximize(Quantizer* quantizer, Box* cube, int direction, int first,
    return max;
 }
 
-static int Cut(Quantizer* quantizer, Box* set1, Box* set2)
+__forceinline static int Cut(Quantizer* quantizer, Box* set1, Box* set2)
 {
    float wholeR = Volume(set1, quantizer->vmr);
    float wholeG = Volume(set1, quantizer->vmg);
@@ -420,13 +308,116 @@ static int Cut(Quantizer* quantizer, Box* set1, Box* set2)
    return 1;
 }
 
-static void Mark(Quantizer* quantizer, Box* cube, char label)
+__forceinline static void Mark(Quantizer* quantizer, Box* cube, char label)
 {
    for (int r = cube->R0 + 1; r <= cube->R1; r++)
       for (int g = cube->G0 + 1; g <= cube->G1; g++)
          for (int b = cube->B0 + 1; b <= cube->B1; b++)
             for (int a = cube->A0 + 1; a <= cube->A1; a++)
                quantizer->tag[GetIndex(r, g, b, a)] = label;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// MAIN FUNCTIONS
+
+static void Clear(Quantizer* quantizer)
+{
+   memset(quantizer->vwt, 0, sizeof(quantizer->vwt));
+   memset(quantizer->vmr, 0, sizeof(quantizer->vmr));
+   memset(quantizer->vmg, 0, sizeof(quantizer->vmg));
+   memset(quantizer->vmb, 0, sizeof(quantizer->vmb));
+   memset(quantizer->vma, 0, sizeof(quantizer->vma));
+   memset(quantizer->m2, 0, sizeof(quantizer->m2));
+   memset(quantizer->tag, 0, sizeof(quantizer->tag));
+   memset(quantizer->cube, 0, sizeof(quantizer->cube));
+}
+
+static void Build3DHistogram(Quantizer* quantizer, unsigned int* image, int width, int height)
+{
+   const int pixels = width * height;
+   for (int i = 0; i < pixels; i++)
+   {
+      unsigned int pix = image[i];
+      unsigned int a = (pix & 0xFF000000) >> 24;
+      unsigned int r = (pix & 0x00FF0000) >> 16;
+      unsigned int g = (pix & 0x0000FF00) >> 8;
+      unsigned int b = pix & 0x000000FF;
+
+      unsigned int inr = r >> (8 - INDEXBITS);
+      unsigned int ing = g >> (8 - INDEXBITS);
+      unsigned int inb = b >> (8 - INDEXBITS);
+      unsigned int ina = a >> (8 - INDEXALPHABITS);
+
+      int ind = GetIndex((int)inr + 1, (int)ing + 1, (int)inb + 1, (int)ina + 1);
+
+      quantizer->vwt[ind]++;
+      quantizer->vmr[ind] += r;
+      quantizer->vmg[ind] += g;
+      quantizer->vmb[ind] += b;
+      quantizer->vma[ind] += a;
+      quantizer->m2[ind] += (r * r) + (g * g) + (b * b) + (a * a);
+   }
+}
+
+static void Get3DMoments(Quantizer* quantizer)
+{
+   for (int r = 1; r < INDEXCOUNT; r++)
+   {
+      memset(quantizer->volume, 0, sizeof(quantizer->volume));
+
+      for (int g = 1; g < INDEXCOUNT; g++)
+      {
+         memset(quantizer->area, 0, sizeof(quantizer->area));
+
+         for (int b = 1; b < INDEXCOUNT; b++)
+         {
+            int line = 0;
+            int lineR = 0;
+            int lineG = 0;
+            int lineB = 0;
+            int lineA = 0;
+            float line2 = 0;
+
+            for (int a = 1; a < INDEXALPHACOUNT; a++)
+            {
+               int ind1 = GetIndex(r, g, b, a);
+
+               line += quantizer->vwt[ind1];
+               lineR += quantizer->vmr[ind1];
+               lineG += quantizer->vmg[ind1];
+               lineB += quantizer->vmb[ind1];
+               lineA += quantizer->vma[ind1];
+               line2 += quantizer->m2[ind1];
+
+               quantizer->area[a].V += line;
+               quantizer->area[a].R += lineR;
+               quantizer->area[a].G += lineG;
+               quantizer->area[a].B += lineB;
+               quantizer->area[a].A += lineA;
+               quantizer->area[a].V2 += line2;
+
+               int inv = (b * INDEXALPHACOUNT) + a;
+
+               quantizer->volume[inv].V += quantizer->area[a].V;
+               quantizer->volume[inv].R += quantizer->area[a].R;
+               quantizer->volume[inv].G += quantizer->area[a].G;
+               quantizer->volume[inv].B += quantizer->area[a].B;
+               quantizer->volume[inv].A += quantizer->area[a].A;
+               quantizer->volume[inv].V2 += quantizer->area[a].V2;
+
+               int ind2 = ind1 - GetIndex(1, 0, 0, 0);
+
+               quantizer->vwt[ind1] = quantizer->vwt[ind2] + quantizer->volume[inv].V;
+               quantizer->vmr[ind1] = quantizer->vmr[ind2] + quantizer->volume[inv].R;
+               quantizer->vmg[ind1] = quantizer->vmg[ind2] + quantizer->volume[inv].G;
+               quantizer->vmb[ind1] = quantizer->vmb[ind2] + quantizer->volume[inv].B;
+               quantizer->vma[ind1] = quantizer->vma[ind2] + quantizer->volume[inv].A;
+               quantizer->m2[ind1] = quantizer->m2[ind2] + quantizer->volume[inv].V2;
+            }
+         }
+      }
+   }
 }
 
 static void BuildCube(Quantizer* quantizer, int* colorCount)
@@ -538,8 +529,13 @@ static void GenerateResult(Quantizer* quantizer, unsigned int* image, unsigned i
 
 Quantizer* Create()
 {
+   // allocate
    Quantizer* quantizer = (Quantizer*)malloc(sizeof(Quantizer));
+
+   // zero by default
    memset(quantizer, 0, sizeof(Quantizer));
+
+   // return
    return quantizer;
 }
 
@@ -549,30 +545,25 @@ void Destroy(Quantizer* quantizer)
 }
 
 int Quantize(
-   Quantizer* quantizer, 
+   Quantizer*    quantizer, 
    unsigned int* image, 
    unsigned int* palette, 
-   int* colorCount, 
-   int width, 
-   int height, 
-   char* destPixels, 
-   int padMultiple4)
+   int*          colorCount, 
+   int           width, 
+   int           height, 
+   char*         destPixels, 
+   int           padMultiple4)
 {
-   if (quantizer == 0)
-   {
+   // nullptr check
+   if ((quantizer == 0) | (image == 0) | (palette == 0) | (colorCount == 0) | (destPixels == 0))
       return 0;
-   }
 
-   if (image == 0 || destPixels == 0 || palette == 0 || colorCount == 0)
-   {
+   // range check
+   const int COLCOUNT = *colorCount;
+   if ((COLCOUNT < 1) | (COLCOUNT > MAXCOLORS))
       return 0;
-   }
 
-   if (*colorCount < 1 || *colorCount > MAXCOLORS)
-   {
-      return 0;
-   }
-
+   // execute
    Clear(quantizer);
    Build3DHistogram(quantizer, image, width, height);
    Get3DMoments(quantizer);
