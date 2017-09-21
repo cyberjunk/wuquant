@@ -35,31 +35,31 @@ typedef struct
    int A0;
    int A1;
    int Volume;
+   float vv;
 } Box;
 
 typedef struct
 {
-   int vwt[TABLELENGTH];
-   int vmr[TABLELENGTH];
-   int vmg[TABLELENGTH];
-   int vmb[TABLELENGTH];
-   int vma[TABLELENGTH];
-   float m2[TABLELENGTH];
-   char  tag[TABLELENGTH];
-   int volume[WORKARRAYSIZE];
-   int volumeR[WORKARRAYSIZE];
-   int volumeG[WORKARRAYSIZE];
-   int volumeB[WORKARRAYSIZE];
-   int volumeA[WORKARRAYSIZE];
-   float volume2[WORKARRAYSIZE];
-   int area[INDEXALPHACOUNT];
-   int areaR[INDEXALPHACOUNT];
-   int areaG[INDEXALPHACOUNT];
-   int areaB[INDEXALPHACOUNT];
-   int areaA[INDEXALPHACOUNT];
-   float area2[INDEXALPHACOUNT];
-   float vv[MAXCOLORS];
-   Box   cube[MAXCOLORS];
+   int V;
+   int R;
+   int G;
+   int B;
+   int A;
+   float V2;
+} Moment;
+
+typedef struct
+{
+   int    vwt[TABLELENGTH];
+   int    vmr[TABLELENGTH];
+   int    vmg[TABLELENGTH];
+   int    vmb[TABLELENGTH];
+   int    vma[TABLELENGTH];
+   float  m2[TABLELENGTH];
+   char   tag[TABLELENGTH];
+   Box    cube[MAXCOLORS];
+   Moment volume[WORKARRAYSIZE];
+   Moment area[INDEXALPHACOUNT];
 } Quantizer;
 
 EXPORT Quantizer* Create();

@@ -192,6 +192,8 @@ __forceinline static void Clear(Quantizer* quantizer)
    memset(quantizer->vma, 0, sizeof(quantizer->vma));
    memset(quantizer->m2, 0, sizeof(quantizer->m2));
    memset(quantizer->tag, 0, sizeof(quantizer->tag));
+
+   memset(quantizer->cube, 0, sizeof(quantizer->cube));
 }
 
 static void Build3DHistogram(Quantizer* quantizer, unsigned int* image, int width, int height)
@@ -226,20 +228,10 @@ static void Get3DMoments(Quantizer* quantizer)
    for (int r = 1; r < INDEXCOUNT; r++)
    {
       memset(quantizer->volume,  0, sizeof(quantizer->volume));
-      memset(quantizer->volumeR, 0, sizeof(quantizer->volumeR));
-      memset(quantizer->volumeG, 0, sizeof(quantizer->volumeG));
-      memset(quantizer->volumeB, 0, sizeof(quantizer->volumeB));
-      memset(quantizer->volumeA, 0, sizeof(quantizer->volumeA));
-      memset(quantizer->volume2, 0, sizeof(quantizer->volume2));
 
       for (int g = 1; g < INDEXCOUNT; g++)
       {
          memset(quantizer->area,  0, sizeof(quantizer->area));
-         memset(quantizer->areaR, 0, sizeof(quantizer->areaR));
-         memset(quantizer->areaG, 0, sizeof(quantizer->areaG));
-         memset(quantizer->areaB, 0, sizeof(quantizer->areaB));
-         memset(quantizer->areaA, 0, sizeof(quantizer->areaA));
-         memset(quantizer->area2, 0, sizeof(quantizer->area2));
 
          for (int b = 1; b < INDEXCOUNT; b++)
          {
@@ -261,30 +253,30 @@ static void Get3DMoments(Quantizer* quantizer)
                lineA += quantizer->vma[ind1];
                line2 += quantizer->m2[ind1];
 
-               quantizer->area[a] += line;
-               quantizer->areaR[a] += lineR;
-               quantizer->areaG[a] += lineG;
-               quantizer->areaB[a] += lineB;
-               quantizer->areaA[a] += lineA;
-               quantizer->area2[a] += line2;
+               quantizer->area[a].V += line;
+               quantizer->area[a].R += lineR;
+               quantizer->area[a].G += lineG;
+               quantizer->area[a].B += lineB;
+               quantizer->area[a].A += lineA;
+               quantizer->area[a].V2 += line2;
 
                int inv = (b * INDEXALPHACOUNT) + a;
 
-               quantizer->volume[inv] += quantizer->area[a];
-               quantizer->volumeR[inv] += quantizer->areaR[a];
-               quantizer->volumeG[inv] += quantizer->areaG[a];
-               quantizer->volumeB[inv] += quantizer->areaB[a];
-               quantizer->volumeA[inv] += quantizer->areaA[a];
-               quantizer->volume2[inv] += quantizer->area2[a];
+               quantizer->volume[inv].V += quantizer->area[a].V;
+               quantizer->volume[inv].R += quantizer->area[a].R;
+               quantizer->volume[inv].G += quantizer->area[a].G;
+               quantizer->volume[inv].B += quantizer->area[a].B;
+               quantizer->volume[inv].A += quantizer->area[a].A;
+               quantizer->volume[inv].V2 += quantizer->area[a].V2;
 
                int ind2 = ind1 - GetIndex(1, 0, 0, 0);
 
-               quantizer->vwt[ind1] = quantizer->vwt[ind2] + quantizer->volume[inv];
-               quantizer->vmr[ind1] = quantizer->vmr[ind2] + quantizer->volumeR[inv];
-               quantizer->vmg[ind1] = quantizer->vmg[ind2] + quantizer->volumeG[inv];
-               quantizer->vmb[ind1] = quantizer->vmb[ind2] + quantizer->volumeB[inv];
-               quantizer->vma[ind1] = quantizer->vma[ind2] + quantizer->volumeA[inv];
-               quantizer->m2[ind1] = quantizer->m2[ind2] + quantizer->volume2[inv];
+               quantizer->vwt[ind1] = quantizer->vwt[ind2] + quantizer->volume[inv].V;
+               quantizer->vmr[ind1] = quantizer->vmr[ind2] + quantizer->volume[inv].R;
+               quantizer->vmg[ind1] = quantizer->vmg[ind2] + quantizer->volume[inv].G;
+               quantizer->vmb[ind1] = quantizer->vmb[ind2] + quantizer->volume[inv].B;
+               quantizer->vma[ind1] = quantizer->vma[ind2] + quantizer->volume[inv].A;
+               quantizer->m2[ind1] = quantizer->m2[ind2] + quantizer->volume[inv].V2;
             }
          }
       }
@@ -439,12 +431,6 @@ static void Mark(Quantizer* quantizer, Box* cube, char label)
 
 static void BuildCube(Quantizer* quantizer, int* colorCount)
 {
-   //clear boxes
-   for (int i = 0; i < *colorCount; i++)
-      ClearBox(&quantizer->cube[i]);
-
-   memset(quantizer->vv, 0, sizeof(quantizer->vv));
-
    quantizer->cube[0].R0 = quantizer->cube[0].G0 = quantizer->cube[0].B0 = quantizer->cube[0].A0 = 0;
    quantizer->cube[0].R1 = quantizer->cube[0].G1 = quantizer->cube[0].B1 = INDEXCOUNT - 1;
    quantizer->cube[0].A1 = INDEXALPHACOUNT - 1;
@@ -455,23 +441,23 @@ static void BuildCube(Quantizer* quantizer, int* colorCount)
    {
       if (Cut(quantizer, &quantizer->cube[next], &quantizer->cube[i]))
       {
-         quantizer->vv[next] = quantizer->cube[next].Volume > 1 ? Variance(quantizer, &quantizer->cube[next]) : 0.0f;
-         quantizer->vv[i] = quantizer->cube[i].Volume > 1 ? Variance(quantizer, &quantizer->cube[i]) : 0.0f;
+         quantizer->cube[next].vv = quantizer->cube[next].Volume > 1 ? Variance(quantizer, &quantizer->cube[next]) : 0.0f;
+         quantizer->cube[i].vv = quantizer->cube[i].Volume > 1 ? Variance(quantizer, &quantizer->cube[i]) : 0.0f;
       }
       else
       {
-         quantizer->vv[next] = 0.0f;
+         quantizer->cube[next].vv = 0.0f;
          i--;
       }
 
       next = 0;
 
-      float temp = quantizer->vv[0];
+      float temp = quantizer->cube[0].vv;
       for (int k = 1; k <= i; k++)
       {
-         if (quantizer->vv[k] > temp)
+         if (quantizer->cube[k].vv > temp)
          {
-            temp = quantizer->vv[k];
+            temp = quantizer->cube[k].vv;
             next = k;
          }
       }
