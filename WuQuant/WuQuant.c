@@ -4,7 +4,7 @@
 #include <string.h>
 #include "WuQuant.h"
 
-inline static int GetIndex(int r, int g, int b, int a)
+__forceinline static int GetIndex(int r, int g, int b, int a)
 {
    return (r << ((INDEXBITS * 2) + INDEXALPHABITS))
       + (r << (INDEXBITS + INDEXALPHABITS + 1))
@@ -16,7 +16,7 @@ inline static int GetIndex(int r, int g, int b, int a)
       + r + g + b + a;
 }
 
-inline static float Volume(Box* cube, int* moment)
+__forceinline static float Volume(Box* cube, int* moment)
 {
    return (float)(moment[GetIndex(cube->R1, cube->G1, cube->B1, cube->A1)]
       - moment[GetIndex(cube->R1, cube->G1, cube->B1, cube->A0)]
@@ -36,7 +36,7 @@ inline static float Volume(Box* cube, int* moment)
       + moment[GetIndex(cube->R0, cube->G0, cube->B0, cube->A0)]);
 }
 
-inline static int Bottom(Box* cube, int direction, int* moment)
+__forceinline static int Bottom(Box* cube, int direction, int* moment)
 {
    switch (direction)
    {
@@ -89,7 +89,7 @@ inline static int Bottom(Box* cube, int direction, int* moment)
    }
 }
 
-inline static int Top(Box* cube, int direction, int position, int* moment)
+__forceinline static int Top(Box* cube, int direction, int position, int* moment)
 {
    switch (direction)
    {
@@ -142,7 +142,7 @@ inline static int Top(Box* cube, int direction, int position, int* moment)
    }
 }
 
-inline static float Variance(Quantizer* quantizer, Box* cube)
+__forceinline static float Variance(Quantizer* quantizer, Box* cube)
 {
    float dr = Volume(cube, quantizer->vmr);
    float dg = Volume(cube, quantizer->vmg);
@@ -170,7 +170,7 @@ inline static float Variance(Quantizer* quantizer, Box* cube)
    return xx - (((dr * dr) + (dg * dg) + (db * db) + (da * da)) / Volume(cube, quantizer->vwt));
 }
 
-inline static void ClearBox(Box* box)
+__forceinline static void ClearBox(Box* box)
 {
    box->R0 = 0;
    box->R1 = 0;
@@ -183,7 +183,7 @@ inline static void ClearBox(Box* box)
    box->Volume = 0;
 }
 
-inline static void Clear(Quantizer* quantizer)
+__forceinline static void Clear(Quantizer* quantizer)
 {
    memset(quantizer->vwt, 0, sizeof(quantizer->vwt));
    memset(quantizer->vmr, 0, sizeof(quantizer->vmr));
