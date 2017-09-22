@@ -19,15 +19,20 @@ __forceinline static int GetIndex(const int r, const int g, const int b, const i
 __forceinline static void Bottom(const Moment* m, 
    const int IDX1, const int IDX2, const int IDX3, const int IDX4, 
    const int IDX5, const int IDX6, const int IDX7, const int IDX8, 
-   int* r, int* g, int* b, int* a, int* w)
+   V4i* v, int* w)
 {
-   *r = -m[IDX1].P.R + m[IDX2].P.R + m[IDX3].P.R - m[IDX4].P.R + m[IDX5].P.R - m[IDX6].P.R - m[IDX7].P.R + m[IDX8].P.R;
-   *g = -m[IDX1].P.G + m[IDX2].P.G + m[IDX3].P.G - m[IDX4].P.G + m[IDX5].P.G - m[IDX6].P.G - m[IDX7].P.G + m[IDX8].P.G;
-   *b = -m[IDX1].P.B + m[IDX2].P.B + m[IDX3].P.B - m[IDX4].P.B + m[IDX5].P.B - m[IDX6].P.B - m[IDX7].P.B + m[IDX8].P.B;
-   *a = -m[IDX1].P.A + m[IDX2].P.A + m[IDX3].P.A - m[IDX4].P.A + m[IDX5].P.A - m[IDX6].P.A - m[IDX7].P.A + m[IDX8].P.A;
+   const __m128i s1 = _mm_setzero_si128();
+   const __m128i s2 = _mm_sub_epi32(s1, m[IDX1].P.SSE);
+   const __m128i s3 = _mm_add_epi32(s2, m[IDX2].P.SSE);
+   const __m128i s4 = _mm_add_epi32(s3, m[IDX3].P.SSE);
+   const __m128i s5 = _mm_sub_epi32(s4, m[IDX4].P.SSE);
+   const __m128i s6 = _mm_add_epi32(s5, m[IDX5].P.SSE);
+   const __m128i s7 = _mm_sub_epi32(s6, m[IDX6].P.SSE);
+   const __m128i s8 = _mm_sub_epi32(s7, m[IDX7].P.SSE);
+   v->SSE = _mm_add_epi32(s8, m[IDX8].P.SSE);
    *w = -m[IDX1].V + m[IDX2].V + m[IDX3].V - m[IDX4].V + m[IDX5].V - m[IDX6].V - m[IDX7].V + m[IDX8].V;
 }
-__forceinline static void BottomR(const Box* c, const Quantizer* q, int* r, int* g, int* b, int* a, int* w)
+__forceinline static void BottomR(const Box* c, const Quantizer* q, V4i* v, int* w)
 {
    const int IDX1 = GetIndex(c->R0, c->G1, c->B1, c->A1);
    const int IDX2 = GetIndex(c->R0, c->G1, c->B1, c->A0);
@@ -37,9 +42,9 @@ __forceinline static void BottomR(const Box* c, const Quantizer* q, int* r, int*
    const int IDX6 = GetIndex(c->R0, c->G0, c->B1, c->A0);
    const int IDX7 = GetIndex(c->R0, c->G0, c->B0, c->A1);
    const int IDX8 = GetIndex(c->R0, c->G0, c->B0, c->A0);
-   Bottom(q->v, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, r, g, b, a, w);
+   Bottom(q->v, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, v, w);
 }
-__forceinline static void BottomG(const Box* c, const Quantizer* q, int* r, int* g, int* b, int* a, int* w)
+__forceinline static void BottomG(const Box* c, const Quantizer* q, V4i* v, int* w)
 {
    const int IDX1 = GetIndex(c->R1, c->G0, c->B1, c->A1);
    const int IDX2 = GetIndex(c->R1, c->G0, c->B1, c->A0);
@@ -49,9 +54,9 @@ __forceinline static void BottomG(const Box* c, const Quantizer* q, int* r, int*
    const int IDX6 = GetIndex(c->R0, c->G0, c->B1, c->A0);
    const int IDX7 = GetIndex(c->R0, c->G0, c->B0, c->A1);
    const int IDX8 = GetIndex(c->R0, c->G0, c->B0, c->A0);
-   Bottom(q->v, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, r, g, b, a, w);
+   Bottom(q->v, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, v, w);
 }
-__forceinline static void BottomB(const Box* c, const Quantizer* q, int* r, int* g, int* b, int* a, int* w)
+__forceinline static void BottomB(const Box* c, const Quantizer* q, V4i* v, int* w)
 {
    const int IDX1 = GetIndex(c->R1, c->G1, c->B0, c->A1);
    const int IDX2 = GetIndex(c->R1, c->G1, c->B0, c->A0);
@@ -61,9 +66,9 @@ __forceinline static void BottomB(const Box* c, const Quantizer* q, int* r, int*
    const int IDX6 = GetIndex(c->R0, c->G1, c->B0, c->A0);
    const int IDX7 = GetIndex(c->R0, c->G0, c->B0, c->A1);
    const int IDX8 = GetIndex(c->R0, c->G0, c->B0, c->A0);
-   Bottom(q->v, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, r, g, b, a, w);
+   Bottom(q->v, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, v, w);
 }
-__forceinline static void BottomA(const Box* c, const Quantizer* q, int* r, int* g, int* b, int* a, int* w)
+__forceinline static void BottomA(const Box* c, const Quantizer* q, V4i* v, int* w)
 {
    const int IDX1 = GetIndex(c->R1, c->G1, c->B1, c->A0);
    const int IDX2 = GetIndex(c->R1, c->G1, c->B0, c->A0);
@@ -73,21 +78,24 @@ __forceinline static void BottomA(const Box* c, const Quantizer* q, int* r, int*
    const int IDX6 = GetIndex(c->R0, c->G1, c->B0, c->A0);
    const int IDX7 = GetIndex(c->R0, c->G0, c->B1, c->A0);
    const int IDX8 = GetIndex(c->R0, c->G0, c->B0, c->A0);
-   Bottom(q->v, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, r, g, b, a, w);
+   Bottom(q->v, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, v, w);
 }
 
 __forceinline static void Top(const Moment* m,
    const int IDX1, const int IDX2, const int IDX3, const int IDX4,
    const int IDX5, const int IDX6, const int IDX7, const int IDX8,
-   int* r, int* g, int* b, int* a, int* w)
+   V4i* v, int* w)
 {
-   *r = m[IDX1].P.R - m[IDX2].P.R - m[IDX3].P.R + m[IDX4].P.R - m[IDX5].P.R + m[IDX6].P.R + m[IDX7].P.R - m[IDX8].P.R;
-   *g = m[IDX1].P.G - m[IDX2].P.G - m[IDX3].P.G + m[IDX4].P.G - m[IDX5].P.G + m[IDX6].P.G + m[IDX7].P.G - m[IDX8].P.G;
-   *b = m[IDX1].P.B - m[IDX2].P.B - m[IDX3].P.B + m[IDX4].P.B - m[IDX5].P.B + m[IDX6].P.B + m[IDX7].P.B - m[IDX8].P.B;
-   *a = m[IDX1].P.A - m[IDX2].P.A - m[IDX3].P.A + m[IDX4].P.A - m[IDX5].P.A + m[IDX6].P.A + m[IDX7].P.A - m[IDX8].P.A;
+   const __m128i s1 = _mm_sub_epi32(m[IDX1].P.SSE, m[IDX2].P.SSE);
+   const __m128i s2 = _mm_sub_epi32(s1, m[IDX3].P.SSE);
+   const __m128i s3 = _mm_add_epi32(s2, m[IDX4].P.SSE);
+   const __m128i s4 = _mm_sub_epi32(s3, m[IDX5].P.SSE);
+   const __m128i s5 = _mm_add_epi32(s4, m[IDX6].P.SSE);
+   const __m128i s6 = _mm_add_epi32(s5, m[IDX7].P.SSE);
+   v->SSE = _mm_sub_epi32(s6, m[IDX8].P.SSE);
    *w = m[IDX1].V - m[IDX2].V - m[IDX3].V + m[IDX4].V - m[IDX5].V + m[IDX6].V + m[IDX7].V - m[IDX8].V;
 }
-__forceinline static void TopR(const Box* c, const int position, const Quantizer* q, int* r, int* g, int* b, int* a, int* w)
+__forceinline static void TopR(const Box* c, const int position, const Quantizer* q, V4i* v, int* w)
 {
    const int IDX1 = GetIndex(position, c->G1, c->B1, c->A1);
    const int IDX2 = GetIndex(position, c->G1, c->B1, c->A0);
@@ -97,9 +105,9 @@ __forceinline static void TopR(const Box* c, const int position, const Quantizer
    const int IDX6 = GetIndex(position, c->G0, c->B1, c->A0);
    const int IDX7 = GetIndex(position, c->G0, c->B0, c->A1);
    const int IDX8 = GetIndex(position, c->G0, c->B0, c->A0);
-   Top(q->v, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, r, g, b, a, w);
+   Top(q->v, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, v, w);
 }
-__forceinline static void TopG(const Box* c, const int position, const Quantizer* q, int* r, int* g, int* b, int* a, int* w)
+__forceinline static void TopG(const Box* c, const int position, const Quantizer* q, V4i* v, int* w)
 {
    const int IDX1 = GetIndex(c->R1, position, c->B1, c->A1);
    const int IDX2 = GetIndex(c->R1, position, c->B1, c->A0);
@@ -109,9 +117,9 @@ __forceinline static void TopG(const Box* c, const int position, const Quantizer
    const int IDX6 = GetIndex(c->R0, position, c->B1, c->A0);
    const int IDX7 = GetIndex(c->R0, position, c->B0, c->A1);
    const int IDX8 = GetIndex(c->R0, position, c->B0, c->A0);
-   Top(q->v, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, r, g, b, a, w);
+   Top(q->v, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, v, w);
 }
-__forceinline static void TopB(const Box* c, const int position, const Quantizer* q, int* r, int* g, int* b, int* a, int* w)
+__forceinline static void TopB(const Box* c, const int position, const Quantizer* q, V4i* v, int* w)
 {
    const int IDX1 = GetIndex(c->R1, c->G1, position, c->A1);
    const int IDX2 = GetIndex(c->R1, c->G1, position, c->A0);
@@ -121,9 +129,9 @@ __forceinline static void TopB(const Box* c, const int position, const Quantizer
    const int IDX6 = GetIndex(c->R0, c->G1, position, c->A0);
    const int IDX7 = GetIndex(c->R0, c->G0, position, c->A1);
    const int IDX8 = GetIndex(c->R0, c->G0, position, c->A0);
-   Top(q->v, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, r, g, b, a, w);
+   Top(q->v, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, v, w);
 }
-__forceinline static void TopA(const Box* c, const int position, const Quantizer* q, int* r, int* g, int* b, int* a, int* w)
+__forceinline static void TopA(const Box* c, const int position, const Quantizer* q, V4i* v, int* w)
 {
    const int IDX1 = GetIndex(c->R1, c->G1, c->B1, position);
    const int IDX2 = GetIndex(c->R1, c->G1, c->B0, position);
@@ -133,23 +141,23 @@ __forceinline static void TopA(const Box* c, const int position, const Quantizer
    const int IDX6 = GetIndex(c->R0, c->G1, c->B0, position);
    const int IDX7 = GetIndex(c->R0, c->G0, c->B1, position);
    const int IDX8 = GetIndex(c->R0, c->G0, c->B0, position);
-   Top(q->v, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, r, g, b, a, w);
+   Top(q->v, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, v, w);
 }
 
 __forceinline static float MaximizeR(Quantizer* quantizer, Box* cube, int first, int last, int* cut, float wholeR, float wholeG, float wholeB, float wholeA, float wholeW)
 {
-   int baseR, baseG, baseB, baseA, baseW;
-   BottomR(cube, quantizer, &baseR, &baseG, &baseB, &baseA, &baseW);
+   V4i base; int baseW;
+   BottomR(cube, quantizer, &base, &baseW);
    float max = 0.0;
    *cut = -1;
    for (int i = first; i < last; i++)
    {
-      int topR, topG, topB, topA, topW;
-      TopR(cube, i, quantizer, &topR, &topG, &topB, &topA, &topW);
-      float halfR = (float)(baseR + topR);
-      float halfG = (float)(baseG + topG);
-      float halfB = (float)(baseB + topB);
-      float halfA = (float)(baseA + topA);
+      V4i top; int topW;
+      TopR(cube, i, quantizer, &top, &topW);
+      float halfR = (float)(base.R + top.R);
+      float halfG = (float)(base.G + top.G);
+      float halfB = (float)(base.B + top.B);
+      float halfA = (float)(base.A + top.A);
       float halfW = (float)(baseW + topW);
       if (halfW == 0) continue;
       float temp = ((halfR * halfR) + (halfG * halfG) + (halfB * halfB) + (halfA * halfA)) / halfW;
@@ -170,18 +178,18 @@ __forceinline static float MaximizeR(Quantizer* quantizer, Box* cube, int first,
 }
 __forceinline static float MaximizeG(Quantizer* quantizer, Box* cube, int first, int last, int* cut, float wholeR, float wholeG, float wholeB, float wholeA, float wholeW)
 {
-   int baseR, baseG, baseB, baseA, baseW;
-   BottomG(cube, quantizer, &baseR, &baseG, &baseB, &baseA, &baseW);
+   V4i base; int baseW;
+   BottomG(cube, quantizer, &base, &baseW);
    float max = 0.0;
    *cut = -1;
    for (int i = first; i < last; i++)
    {
-      int topR, topG, topB, topA, topW;
-      TopG(cube, i, quantizer, &topR, &topG, &topB, &topA, &topW);
-      float halfR = (float)(baseR + topR);
-      float halfG = (float)(baseG + topG);
-      float halfB = (float)(baseB + topB);
-      float halfA = (float)(baseA + topA);
+      V4i top; int topW;
+      TopG(cube, i, quantizer, &top, &topW);
+      float halfR = (float)(base.R + top.R);
+      float halfG = (float)(base.G + top.G);
+      float halfB = (float)(base.B + top.B);
+      float halfA = (float)(base.A + top.A);
       float halfW = (float)(baseW + topW);
       if (halfW == 0) continue;
       float temp = ((halfR * halfR) + (halfG * halfG) + (halfB * halfB) + (halfA * halfA)) / halfW;
@@ -202,18 +210,18 @@ __forceinline static float MaximizeG(Quantizer* quantizer, Box* cube, int first,
 }
 __forceinline static float MaximizeB(Quantizer* quantizer, Box* cube, int first, int last, int* cut, float wholeR, float wholeG, float wholeB, float wholeA, float wholeW)
 {
-   int baseR, baseG, baseB, baseA, baseW;
-   BottomB(cube, quantizer, &baseR, &baseG, &baseB, &baseA, &baseW);
+   V4i base; int baseW;
+   BottomB(cube, quantizer, &base, &baseW);
    float max = 0.0;
    *cut = -1;
    for (int i = first; i < last; i++)
    {
-      int topR, topG, topB, topA, topW;
-      TopB(cube, i, quantizer, &topR, &topG, &topB, &topA, &topW);
-      float halfR = (float)(baseR + topR);
-      float halfG = (float)(baseG + topG);
-      float halfB = (float)(baseB + topB);
-      float halfA = (float)(baseA + topA);
+      V4i top; int topW;
+      TopB(cube, i, quantizer, &top, &topW);
+      float halfR = (float)(base.R + top.R);
+      float halfG = (float)(base.G + top.G);
+      float halfB = (float)(base.B + top.B);
+      float halfA = (float)(base.A + top.A);
       float halfW = (float)(baseW + topW);
       if (halfW == 0) continue;
       float temp = ((halfR * halfR) + (halfG * halfG) + (halfB * halfB) + (halfA * halfA)) / halfW;
@@ -234,18 +242,18 @@ __forceinline static float MaximizeB(Quantizer* quantizer, Box* cube, int first,
 }
 __forceinline static float MaximizeA(Quantizer* quantizer, Box* cube, int first, int last, int* cut, float wholeR, float wholeG, float wholeB, float wholeA, float wholeW)
 {
-   int baseR, baseG, baseB, baseA, baseW;
-   BottomA(cube, quantizer, &baseR, &baseG, &baseB, &baseA, &baseW);
+   V4i base; int baseW;
+   BottomA(cube, quantizer, &base, &baseW);
    float max = 0.0;
    *cut = -1;
    for (int i = first; i < last; i++)
    {
-      int topR, topG, topB, topA, topW;
-      TopA(cube, i, quantizer, &topR, &topG, &topB, &topA, &topW);
-      float halfR = (float)(baseR + topR);
-      float halfG = (float)(baseG + topG);
-      float halfB = (float)(baseB + topB);
-      float halfA = (float)(baseA + topA);
+      V4i top; int topW;
+      TopA(cube, i, quantizer, &top, &topW);
+      float halfR = (float)(base.R + top.R);
+      float halfG = (float)(base.G + top.G);
+      float halfB = (float)(base.B + top.B);
+      float halfA = (float)(base.A + top.A);
       float halfW = (float)(baseW + topW);
       if (halfW == 0) continue;
       float temp = ((halfR * halfR) + (halfG * halfG) + (halfB * halfB) + (halfA * halfA)) / halfW;

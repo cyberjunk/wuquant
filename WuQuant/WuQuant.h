@@ -62,6 +62,7 @@ typedef struct
    Moment area[INDEXALPHACOUNT];
 } Quantizer;
 
+
 EXPORT Quantizer* Create();
 EXPORT void Destroy(Quantizer* quantizer);
 EXPORT int Quantize(Quantizer* quantizer, unsigned int* image, unsigned int* palette, int* colorCount, int width, int height, char* destPixels, int padMultiple4);
