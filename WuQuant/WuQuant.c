@@ -152,19 +152,20 @@ __forceinline static float MaximizeR(Quantizer* quantizer, Box* cube, int first,
    *cut = -1;
    for (int i = first; i < last; i++)
    {
-      V4i top; int topW; V4f half;
+      V4i top; int topW; V4f half; float halfW; __m128 temp; float tf;
       TopR(cube, i, quantizer, &top, &topW);
       half.SSE = _mm_cvtepi32_ps(_mm_add_epi32(base.SSE, top.SSE));
-      float halfW = (float)(baseW + topW);
+      halfW = (float)(baseW + topW);
       if (halfW == 0) continue;
-      float temp = ((half.R * half.R) + (half.G * half.G) + (half.B * half.B) + (half.A * half.A)) / halfW;
+      temp = _mm_div_ss(_mm_dp_ps(half.SSE, half.SSE, 0xF1), _mm_set_ss(halfW));
       half.SSE = _mm_sub_ps(whole->SSE, half.SSE);
       halfW = wholeW - halfW;
       if (halfW == 0) continue;
-      temp += ((half.R * half.R) + (half.G * half.G) + (half.B * half.B) + (half.A * half.A)) / halfW;
-      if (temp > max)
+      temp = _mm_add_ss(temp, _mm_div_ss(_mm_dp_ps(half.SSE, half.SSE, 0xF1), _mm_set_ss(halfW)));
+      tf = temp.m128_f32[0];
+      if (tf > max)
       {
-         max = temp;
+         max = tf;
          *cut = i;
       }
    }
@@ -178,19 +179,20 @@ __forceinline static float MaximizeG(Quantizer* quantizer, Box* cube, int first,
    *cut = -1;
    for (int i = first; i < last; i++)
    {
-      V4i top; int topW; V4f half;
+      V4i top; int topW; V4f half; float halfW; __m128 temp; float tf;
       TopG(cube, i, quantizer, &top, &topW);
       half.SSE = _mm_cvtepi32_ps(_mm_add_epi32(base.SSE, top.SSE));
-      float halfW = (float)(baseW + topW);
+      halfW = (float)(baseW + topW);
       if (halfW == 0) continue;
-      float temp = ((half.R * half.R) + (half.G * half.G) + (half.B * half.B) + (half.A * half.A)) / halfW;
+      temp = _mm_div_ss(_mm_dp_ps(half.SSE, half.SSE, 0xF1), _mm_set_ss(halfW));
       half.SSE = _mm_sub_ps(whole->SSE, half.SSE);
       halfW = wholeW - halfW;
       if (halfW == 0) continue;
-      temp += ((half.R * half.R) + (half.G * half.G) + (half.B * half.B) + (half.A * half.A)) / halfW;
-      if (temp > max)
+      temp = _mm_add_ss(temp, _mm_div_ss(_mm_dp_ps(half.SSE, half.SSE, 0xF1), _mm_set_ss(halfW)));
+      tf = temp.m128_f32[0];
+      if (tf > max)
       {
-         max = temp;
+         max = tf;
          *cut = i;
       }
    }
@@ -204,19 +206,20 @@ __forceinline static float MaximizeB(Quantizer* quantizer, Box* cube, int first,
    *cut = -1;
    for (int i = first; i < last; i++)
    {
-      V4i top; int topW; V4f half;
+      V4i top; int topW; V4f half; float halfW; __m128 temp; float tf;
       TopB(cube, i, quantizer, &top, &topW);
       half.SSE = _mm_cvtepi32_ps(_mm_add_epi32(base.SSE, top.SSE));
-      float halfW = (float)(baseW + topW);
+      halfW = (float)(baseW + topW);
       if (halfW == 0) continue;
-      float temp = ((half.R * half.R) + (half.G * half.G) + (half.B * half.B) + (half.A * half.A)) / halfW;
+      temp = _mm_div_ss(_mm_dp_ps(half.SSE, half.SSE, 0xF1), _mm_set_ss(halfW));
       half.SSE = _mm_sub_ps(whole->SSE, half.SSE);
       halfW = wholeW - halfW;
       if (halfW == 0) continue;
-      temp += ((half.R * half.R) + (half.G * half.G) + (half.B * half.B) + (half.A * half.A)) / halfW;
-      if (temp > max)
+      temp = _mm_add_ss(temp, _mm_div_ss(_mm_dp_ps(half.SSE, half.SSE, 0xF1), _mm_set_ss(halfW)));
+      tf = temp.m128_f32[0];
+      if (tf > max)
       {
-         max = temp;
+         max = tf;
          *cut = i;
       }
    }
@@ -230,26 +233,27 @@ __forceinline static float MaximizeA(Quantizer* quantizer, Box* cube, int first,
    *cut = -1;
    for (int i = first; i < last; i++)
    {
-      V4i top; int topW; V4f half;
+      V4i top; int topW; V4f half; float halfW; __m128 temp; float tf;
       TopA(cube, i, quantizer, &top, &topW);
       half.SSE = _mm_cvtepi32_ps(_mm_add_epi32(base.SSE, top.SSE));
-      float halfW = (float)(baseW + topW);
+      halfW = (float)(baseW + topW);
       if (halfW == 0) continue;
-      float temp = ((half.R * half.R) + (half.G * half.G) + (half.B * half.B) + (half.A * half.A)) / halfW;
+      temp = _mm_div_ss(_mm_dp_ps(half.SSE, half.SSE, 0xF1), _mm_set_ss(halfW));
       half.SSE = _mm_sub_ps(whole->SSE, half.SSE);
       halfW = wholeW - halfW;
       if (halfW == 0) continue;
-      temp += ((half.R * half.R) + (half.G * half.G) + (half.B * half.B) + (half.A * half.A)) / halfW;
-      if (temp > max)
+      temp = _mm_add_ss(temp, _mm_div_ss(_mm_dp_ps(half.SSE, half.SSE, 0xF1), _mm_set_ss(halfW)));
+      tf = temp.m128_f32[0];
+      if (tf > max)
       {
-         max = temp;
+         max = tf;
          *cut = i;
       }
    }
    return max;
 }
 
-__forceinline static void VolumeRGBA(const Box* cube, const Quantizer* quantizer, float* vR, float* vG, float* vB, float* vA)
+__forceinline static void VolumeRGBA(const Box* cube, const Quantizer* quantizer, V4f* col)
 {
    const int IDX1 = GetIndex(cube->R1, cube->G1, cube->B1, cube->A1);
    const int IDX2 = GetIndex(cube->R1, cube->G1, cube->B1, cube->A0);
@@ -270,25 +274,25 @@ __forceinline static void VolumeRGBA(const Box* cube, const Quantizer* quantizer
 
    const Moment* v = quantizer->v;
 
-   *vR = (float)(
+   col->R = (float)(
       v[IDX1].P.R  - v[IDX2].P.R  - v[IDX3].P.R  + v[IDX4].P.R  -
       v[IDX5].P.R  + v[IDX6].P.R  + v[IDX7].P.R  - v[IDX8].P.R  -
       v[IDX9].P.R  + v[IDX10].P.R + v[IDX11].P.R - v[IDX12].P.R +
       v[IDX13].P.R - v[IDX14].P.R - v[IDX15].P.R + v[IDX16].P.R);
 
-   *vG = (float)(
+   col->G = (float)(
       v[IDX1].P.G  - v[IDX2].P.G  - v[IDX3].P.G  + v[IDX4].P.G  -
       v[IDX5].P.G  + v[IDX6].P.G  + v[IDX7].P.G  - v[IDX8].P.G  -
       v[IDX9].P.G  + v[IDX10].P.G + v[IDX11].P.G - v[IDX12].P.G +
       v[IDX13].P.G - v[IDX14].P.G - v[IDX15].P.G + v[IDX16].P.G);
 
-   *vB = (float)(
+   col->B = (float)(
       v[IDX1].P.B  - v[IDX2].P.B  - v[IDX3].P.B  + v[IDX4].P.B  -
       v[IDX5].P.B  + v[IDX6].P.B  + v[IDX7].P.B  - v[IDX8].P.B  -
       v[IDX9].P.B  + v[IDX10].P.B + v[IDX11].P.B - v[IDX12].P.B +
       v[IDX13].P.B - v[IDX14].P.B - v[IDX15].P.B + v[IDX16].P.B);
 
-   *vA = (float)(
+   col->A = (float)(
       v[IDX1].P.A  - v[IDX2].P.A  - v[IDX3].P.A  + v[IDX4].P.A  -
       v[IDX5].P.A  + v[IDX6].P.A  + v[IDX7].P.A  - v[IDX8].P.A  -
       v[IDX9].P.A  + v[IDX10].P.A + v[IDX11].P.A - v[IDX12].P.A +
@@ -325,8 +329,8 @@ __forceinline static float VolumeVWT(const Box* cube, const Quantizer* quantizer
 
 __forceinline static float Variance(const Quantizer* quantizer, const Box* cube)
 {
-   float dr, dg, db, da;
-   VolumeRGBA(cube, quantizer, &dr, &dg, &db, &da);
+   V4f d;
+   VolumeRGBA(cube, quantizer, &d);
 
    const int IDX1 = GetIndex(cube->R1, cube->G1, cube->B1, cube->A1);
    const int IDX2 = GetIndex(cube->R1, cube->G1, cube->B1, cube->A0);
@@ -353,13 +357,13 @@ __forceinline static float Variance(const Quantizer* quantizer, const Box* cube)
       - v[IDX9].V2  + v[IDX10].V2 + v[IDX11].V2 - v[IDX12].V2
       + v[IDX13].V2 - v[IDX14].V2 - v[IDX15].V2 + v[IDX16].V2;
 
-   return xx - (((dr * dr) + (dg * dg) + (db * db) + (da * da)) / VolumeVWT(cube, quantizer));
+   return xx - (((d.R * d.R) + (d.G * d.G) + (d.B * d.B) + (d.A * d.A)) / VolumeVWT(cube, quantizer));
 }
 
 __forceinline static int Cut(Quantizer* quantizer, Box* set1, Box* set2)
 {
    V4f whole;
-   VolumeRGBA(set1, quantizer, &whole.R, &whole.G, &whole.B, &whole.A);
+   VolumeRGBA(set1, quantizer, &whole);
 
    float wholeW = VolumeVWT(set1, quantizer);
 
@@ -593,17 +597,17 @@ static void GenerateResult(Quantizer* quantizer, unsigned int* image, unsigned i
 
       if (weight > 0.01 || weight < -0.01)
       {
-         float dr, dg, db, da;
-         VolumeRGBA(&quantizer->cube[k], quantizer, &dr, &dg, &db, &da);
-         dr /= weight;
-         dg /= weight;
-         db /= weight;
-         da /= weight;
+         V4f d;
+         VolumeRGBA(&quantizer->cube[k], quantizer, &d);
+         d.R /= weight;
+         d.G /= weight;
+         d.B /= weight;
+         d.A /= weight;
 
-         unsigned int a = (unsigned int)da;
-         unsigned int r = (unsigned int)dr;
-         unsigned int g = (unsigned int)dg;
-         unsigned int b = (unsigned int)db;
+         unsigned int a = (unsigned int)d.A;
+         unsigned int r = (unsigned int)d.R;
+         unsigned int g = (unsigned int)d.G;
+         unsigned int b = (unsigned int)d.B;
 
          palette[k] = (a << 24) | (r << 16) | (g << 8) | b;
       }
