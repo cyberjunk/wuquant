@@ -274,29 +274,22 @@ __forceinline static void VolumeRGBA(const Box* cube, const Quantizer* quantizer
 
    const Moment* v = quantizer->v;
 
-   col->R = (float)(
-      v[IDX1].P.R  - v[IDX2].P.R  - v[IDX3].P.R  + v[IDX4].P.R  -
-      v[IDX5].P.R  + v[IDX6].P.R  + v[IDX7].P.R  - v[IDX8].P.R  -
-      v[IDX9].P.R  + v[IDX10].P.R + v[IDX11].P.R - v[IDX12].P.R +
-      v[IDX13].P.R - v[IDX14].P.R - v[IDX15].P.R + v[IDX16].P.R);
-
-   col->G = (float)(
-      v[IDX1].P.G  - v[IDX2].P.G  - v[IDX3].P.G  + v[IDX4].P.G  -
-      v[IDX5].P.G  + v[IDX6].P.G  + v[IDX7].P.G  - v[IDX8].P.G  -
-      v[IDX9].P.G  + v[IDX10].P.G + v[IDX11].P.G - v[IDX12].P.G +
-      v[IDX13].P.G - v[IDX14].P.G - v[IDX15].P.G + v[IDX16].P.G);
-
-   col->B = (float)(
-      v[IDX1].P.B  - v[IDX2].P.B  - v[IDX3].P.B  + v[IDX4].P.B  -
-      v[IDX5].P.B  + v[IDX6].P.B  + v[IDX7].P.B  - v[IDX8].P.B  -
-      v[IDX9].P.B  + v[IDX10].P.B + v[IDX11].P.B - v[IDX12].P.B +
-      v[IDX13].P.B - v[IDX14].P.B - v[IDX15].P.B + v[IDX16].P.B);
-
-   col->A = (float)(
-      v[IDX1].P.A  - v[IDX2].P.A  - v[IDX3].P.A  + v[IDX4].P.A  -
-      v[IDX5].P.A  + v[IDX6].P.A  + v[IDX7].P.A  - v[IDX8].P.A  -
-      v[IDX9].P.A  + v[IDX10].P.A + v[IDX11].P.A - v[IDX12].P.A +
-      v[IDX13].P.A - v[IDX14].P.A - v[IDX15].P.A + v[IDX16].P.A);
+   __m128i s01 = _mm_sub_epi32(v[IDX1].P.SSE, v[IDX2].P.SSE);
+   __m128i s02 = _mm_sub_epi32(s01, v[IDX3].P.SSE);
+   __m128i s03 = _mm_add_epi32(s02, v[IDX4].P.SSE);
+   __m128i s04 = _mm_sub_epi32(s03, v[IDX5].P.SSE);
+   __m128i s05 = _mm_add_epi32(s04, v[IDX6].P.SSE);
+   __m128i s06 = _mm_add_epi32(s05, v[IDX7].P.SSE);
+   __m128i s07 = _mm_sub_epi32(s06, v[IDX8].P.SSE);
+   __m128i s08 = _mm_sub_epi32(s07, v[IDX9].P.SSE);
+   __m128i s09 = _mm_add_epi32(s08, v[IDX10].P.SSE);
+   __m128i s10 = _mm_add_epi32(s09, v[IDX11].P.SSE);
+   __m128i s11 = _mm_sub_epi32(s10, v[IDX12].P.SSE);
+   __m128i s12 = _mm_add_epi32(s11, v[IDX13].P.SSE);
+   __m128i s13 = _mm_sub_epi32(s12, v[IDX14].P.SSE);
+   __m128i s14 = _mm_sub_epi32(s13, v[IDX15].P.SSE);
+   __m128i s15 = _mm_add_epi32(s14, v[IDX16].P.SSE);
+   col->SSE = _mm_cvtepi32_ps(s15);
 }
 
 __forceinline static float VolumeVWT(const Box* cube, const Quantizer* quantizer)
