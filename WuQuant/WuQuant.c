@@ -16,112 +16,141 @@ __forceinline static int GetIndex(const int r, const int g, const int b, const i
       + r + g + b + a;
 }
 
-__forceinline static int BottomR(const Box* cube, const int* moment)
+__forceinline static void Bottom(const Moment* m, 
+   const int IDX1, const int IDX2, const int IDX3, const int IDX4, 
+   const int IDX5, const int IDX6, const int IDX7, const int IDX8, 
+   int* r, int* g, int* b, int* a, int* w)
 {
-   return -moment[GetIndex(cube->R0, cube->G1, cube->B1, cube->A1)]
-      + moment[GetIndex(cube->R0, cube->G1, cube->B1, cube->A0)]
-      + moment[GetIndex(cube->R0, cube->G1, cube->B0, cube->A1)]
-      - moment[GetIndex(cube->R0, cube->G1, cube->B0, cube->A0)]
-      + moment[GetIndex(cube->R0, cube->G0, cube->B1, cube->A1)]
-      - moment[GetIndex(cube->R0, cube->G0, cube->B1, cube->A0)]
-      - moment[GetIndex(cube->R0, cube->G0, cube->B0, cube->A1)]
-      + moment[GetIndex(cube->R0, cube->G0, cube->B0, cube->A0)];
+   *r = -m[IDX1].R + m[IDX2].R + m[IDX3].R - m[IDX4].R + m[IDX5].R - m[IDX6].R - m[IDX7].R + m[IDX8].R;
+   *g = -m[IDX1].G + m[IDX2].G + m[IDX3].G - m[IDX4].G + m[IDX5].G - m[IDX6].G - m[IDX7].G + m[IDX8].G;
+   *b = -m[IDX1].B + m[IDX2].B + m[IDX3].B - m[IDX4].B + m[IDX5].B - m[IDX6].B - m[IDX7].B + m[IDX8].B;
+   *a = -m[IDX1].A + m[IDX2].A + m[IDX3].A - m[IDX4].A + m[IDX5].A - m[IDX6].A - m[IDX7].A + m[IDX8].A;
+   *w = -m[IDX1].V + m[IDX2].V + m[IDX3].V - m[IDX4].V + m[IDX5].V - m[IDX6].V - m[IDX7].V + m[IDX8].V;
 }
-__forceinline static int BottomG(const Box* cube, const int* moment)
+__forceinline static void BottomR(const Box* c, const Quantizer* q, int* r, int* g, int* b, int* a, int* w)
 {
-   return -moment[GetIndex(cube->R1, cube->G0, cube->B1, cube->A1)]
-      + moment[GetIndex(cube->R1, cube->G0, cube->B1, cube->A0)]
-      + moment[GetIndex(cube->R1, cube->G0, cube->B0, cube->A1)]
-      - moment[GetIndex(cube->R1, cube->G0, cube->B0, cube->A0)]
-      + moment[GetIndex(cube->R0, cube->G0, cube->B1, cube->A1)]
-      - moment[GetIndex(cube->R0, cube->G0, cube->B1, cube->A0)]
-      - moment[GetIndex(cube->R0, cube->G0, cube->B0, cube->A1)]
-      + moment[GetIndex(cube->R0, cube->G0, cube->B0, cube->A0)];
+   const int IDX1 = GetIndex(c->R0, c->G1, c->B1, c->A1);
+   const int IDX2 = GetIndex(c->R0, c->G1, c->B1, c->A0);
+   const int IDX3 = GetIndex(c->R0, c->G1, c->B0, c->A1);
+   const int IDX4 = GetIndex(c->R0, c->G1, c->B0, c->A0);
+   const int IDX5 = GetIndex(c->R0, c->G0, c->B1, c->A1);
+   const int IDX6 = GetIndex(c->R0, c->G0, c->B1, c->A0);
+   const int IDX7 = GetIndex(c->R0, c->G0, c->B0, c->A1);
+   const int IDX8 = GetIndex(c->R0, c->G0, c->B0, c->A0);
+   Bottom(q->v, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, r, g, b, a, w);
 }
-__forceinline static int BottomB(const Box* cube, const int* moment)
+__forceinline static void BottomG(const Box* c, const Quantizer* q, int* r, int* g, int* b, int* a, int* w)
 {
-   return -moment[GetIndex(cube->R1, cube->G1, cube->B0, cube->A1)]
-      + moment[GetIndex(cube->R1, cube->G1, cube->B0, cube->A0)]
-      + moment[GetIndex(cube->R1, cube->G0, cube->B0, cube->A1)]
-      - moment[GetIndex(cube->R1, cube->G0, cube->B0, cube->A0)]
-      + moment[GetIndex(cube->R0, cube->G1, cube->B0, cube->A1)]
-      - moment[GetIndex(cube->R0, cube->G1, cube->B0, cube->A0)]
-      - moment[GetIndex(cube->R0, cube->G0, cube->B0, cube->A1)]
-      + moment[GetIndex(cube->R0, cube->G0, cube->B0, cube->A0)];
+   const int IDX1 = GetIndex(c->R1, c->G0, c->B1, c->A1);
+   const int IDX2 = GetIndex(c->R1, c->G0, c->B1, c->A0);
+   const int IDX3 = GetIndex(c->R1, c->G0, c->B0, c->A1);
+   const int IDX4 = GetIndex(c->R1, c->G0, c->B0, c->A0);
+   const int IDX5 = GetIndex(c->R0, c->G0, c->B1, c->A1);
+   const int IDX6 = GetIndex(c->R0, c->G0, c->B1, c->A0);
+   const int IDX7 = GetIndex(c->R0, c->G0, c->B0, c->A1);
+   const int IDX8 = GetIndex(c->R0, c->G0, c->B0, c->A0);
+   Bottom(q->v, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, r, g, b, a, w);
 }
-__forceinline static int BottomA(const Box* cube, const int* moment)
+__forceinline static void BottomB(const Box* c, const Quantizer* q, int* r, int* g, int* b, int* a, int* w)
 {
-   return -moment[GetIndex(cube->R1, cube->G1, cube->B1, cube->A0)]
-      + moment[GetIndex(cube->R1, cube->G1, cube->B0, cube->A0)]
-      + moment[GetIndex(cube->R1, cube->G0, cube->B1, cube->A0)]
-      - moment[GetIndex(cube->R1, cube->G0, cube->B0, cube->A0)]
-      + moment[GetIndex(cube->R0, cube->G1, cube->B1, cube->A0)]
-      - moment[GetIndex(cube->R0, cube->G1, cube->B0, cube->A0)]
-      - moment[GetIndex(cube->R0, cube->G0, cube->B1, cube->A0)]
-      + moment[GetIndex(cube->R0, cube->G0, cube->B0, cube->A0)];
+   const int IDX1 = GetIndex(c->R1, c->G1, c->B0, c->A1);
+   const int IDX2 = GetIndex(c->R1, c->G1, c->B0, c->A0);
+   const int IDX3 = GetIndex(c->R1, c->G0, c->B0, c->A1);
+   const int IDX4 = GetIndex(c->R1, c->G0, c->B0, c->A0);
+   const int IDX5 = GetIndex(c->R0, c->G1, c->B0, c->A1);
+   const int IDX6 = GetIndex(c->R0, c->G1, c->B0, c->A0);
+   const int IDX7 = GetIndex(c->R0, c->G0, c->B0, c->A1);
+   const int IDX8 = GetIndex(c->R0, c->G0, c->B0, c->A0);
+   Bottom(q->v, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, r, g, b, a, w);
+}
+__forceinline static void BottomA(const Box* c, const Quantizer* q, int* r, int* g, int* b, int* a, int* w)
+{
+   const int IDX1 = GetIndex(c->R1, c->G1, c->B1, c->A0);
+   const int IDX2 = GetIndex(c->R1, c->G1, c->B0, c->A0);
+   const int IDX3 = GetIndex(c->R1, c->G0, c->B1, c->A0);
+   const int IDX4 = GetIndex(c->R1, c->G0, c->B0, c->A0);
+   const int IDX5 = GetIndex(c->R0, c->G1, c->B1, c->A0);
+   const int IDX6 = GetIndex(c->R0, c->G1, c->B0, c->A0);
+   const int IDX7 = GetIndex(c->R0, c->G0, c->B1, c->A0);
+   const int IDX8 = GetIndex(c->R0, c->G0, c->B0, c->A0);
+   Bottom(q->v, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, r, g, b, a, w);
 }
 
-__forceinline static int TopR(const Box* cube, const int position, const int* moment)
+__forceinline static void Top(const Moment* m,
+   const int IDX1, const int IDX2, const int IDX3, const int IDX4,
+   const int IDX5, const int IDX6, const int IDX7, const int IDX8,
+   int* r, int* g, int* b, int* a, int* w)
 {
-   return moment[GetIndex(position, cube->G1, cube->B1, cube->A1)]
-      - moment[GetIndex(position, cube->G1, cube->B1, cube->A0)]
-      - moment[GetIndex(position, cube->G1, cube->B0, cube->A1)]
-      + moment[GetIndex(position, cube->G1, cube->B0, cube->A0)]
-      - moment[GetIndex(position, cube->G0, cube->B1, cube->A1)]
-      + moment[GetIndex(position, cube->G0, cube->B1, cube->A0)]
-      + moment[GetIndex(position, cube->G0, cube->B0, cube->A1)]
-      - moment[GetIndex(position, cube->G0, cube->B0, cube->A0)];
+   *r = m[IDX1].R - m[IDX2].R - m[IDX3].R + m[IDX4].R - m[IDX5].R + m[IDX6].R + m[IDX7].R - m[IDX8].R;
+   *g = m[IDX1].G - m[IDX2].G - m[IDX3].G + m[IDX4].G - m[IDX5].G + m[IDX6].G + m[IDX7].G - m[IDX8].G;
+   *b = m[IDX1].B - m[IDX2].B - m[IDX3].B + m[IDX4].B - m[IDX5].B + m[IDX6].B + m[IDX7].B - m[IDX8].B;
+   *a = m[IDX1].A - m[IDX2].A - m[IDX3].A + m[IDX4].A - m[IDX5].A + m[IDX6].A + m[IDX7].A - m[IDX8].A;
+   *w = m[IDX1].V - m[IDX2].V - m[IDX3].V + m[IDX4].V - m[IDX5].V + m[IDX6].V + m[IDX7].V - m[IDX8].V;
 }
-__forceinline static int TopG(const Box* cube, const int position, const int* moment)
+__forceinline static void TopR(const Box* c, const int position, const Quantizer* q, int* r, int* g, int* b, int* a, int* w)
 {
-   return moment[GetIndex(cube->R1, position, cube->B1, cube->A1)]
-      - moment[GetIndex(cube->R1, position, cube->B1, cube->A0)]
-      - moment[GetIndex(cube->R1, position, cube->B0, cube->A1)]
-      + moment[GetIndex(cube->R1, position, cube->B0, cube->A0)]
-      - moment[GetIndex(cube->R0, position, cube->B1, cube->A1)]
-      + moment[GetIndex(cube->R0, position, cube->B1, cube->A0)]
-      + moment[GetIndex(cube->R0, position, cube->B0, cube->A1)]
-      - moment[GetIndex(cube->R0, position, cube->B0, cube->A0)];
+   const int IDX1 = GetIndex(position, c->G1, c->B1, c->A1);
+   const int IDX2 = GetIndex(position, c->G1, c->B1, c->A0);
+   const int IDX3 = GetIndex(position, c->G1, c->B0, c->A1);
+   const int IDX4 = GetIndex(position, c->G1, c->B0, c->A0);
+   const int IDX5 = GetIndex(position, c->G0, c->B1, c->A1);
+   const int IDX6 = GetIndex(position, c->G0, c->B1, c->A0);
+   const int IDX7 = GetIndex(position, c->G0, c->B0, c->A1);
+   const int IDX8 = GetIndex(position, c->G0, c->B0, c->A0);
+   Top(q->v, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, r, g, b, a, w);
 }
-__forceinline static int TopB(const Box* cube, const int position, const int* moment)
+__forceinline static void TopG(const Box* c, const int position, const Quantizer* q, int* r, int* g, int* b, int* a, int* w)
 {
-   return moment[GetIndex(cube->R1, cube->G1, position, cube->A1)]
-      - moment[GetIndex(cube->R1, cube->G1, position, cube->A0)]
-      - moment[GetIndex(cube->R1, cube->G0, position, cube->A1)]
-      + moment[GetIndex(cube->R1, cube->G0, position, cube->A0)]
-      - moment[GetIndex(cube->R0, cube->G1, position, cube->A1)]
-      + moment[GetIndex(cube->R0, cube->G1, position, cube->A0)]
-      + moment[GetIndex(cube->R0, cube->G0, position, cube->A1)]
-      - moment[GetIndex(cube->R0, cube->G0, position, cube->A0)];
+   const int IDX1 = GetIndex(c->R1, position, c->B1, c->A1);
+   const int IDX2 = GetIndex(c->R1, position, c->B1, c->A0);
+   const int IDX3 = GetIndex(c->R1, position, c->B0, c->A1);
+   const int IDX4 = GetIndex(c->R1, position, c->B0, c->A0);
+   const int IDX5 = GetIndex(c->R0, position, c->B1, c->A1);
+   const int IDX6 = GetIndex(c->R0, position, c->B1, c->A0);
+   const int IDX7 = GetIndex(c->R0, position, c->B0, c->A1);
+   const int IDX8 = GetIndex(c->R0, position, c->B0, c->A0);
+   Top(q->v, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, r, g, b, a, w);
 }
-__forceinline static int TopA(const Box* cube, const int position, const int* moment)
+__forceinline static void TopB(const Box* c, const int position, const Quantizer* q, int* r, int* g, int* b, int* a, int* w)
 {
-   return moment[GetIndex(cube->R1, cube->G1, cube->B1, position)]
-      - moment[GetIndex(cube->R1, cube->G1, cube->B0, position)]
-      - moment[GetIndex(cube->R1, cube->G0, cube->B1, position)]
-      + moment[GetIndex(cube->R1, cube->G0, cube->B0, position)]
-      - moment[GetIndex(cube->R0, cube->G1, cube->B1, position)]
-      + moment[GetIndex(cube->R0, cube->G1, cube->B0, position)]
-      + moment[GetIndex(cube->R0, cube->G0, cube->B1, position)]
-      - moment[GetIndex(cube->R0, cube->G0, cube->B0, position)];
+   const int IDX1 = GetIndex(c->R1, c->G1, position, c->A1);
+   const int IDX2 = GetIndex(c->R1, c->G1, position, c->A0);
+   const int IDX3 = GetIndex(c->R1, c->G0, position, c->A1);
+   const int IDX4 = GetIndex(c->R1, c->G0, position, c->A0);
+   const int IDX5 = GetIndex(c->R0, c->G1, position, c->A1);
+   const int IDX6 = GetIndex(c->R0, c->G1, position, c->A0);
+   const int IDX7 = GetIndex(c->R0, c->G0, position, c->A1);
+   const int IDX8 = GetIndex(c->R0, c->G0, position, c->A0);
+   Top(q->v, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, r, g, b, a, w);
+}
+__forceinline static void TopA(const Box* c, const int position, const Quantizer* q, int* r, int* g, int* b, int* a, int* w)
+{
+   const int IDX1 = GetIndex(c->R1, c->G1, c->B1, position);
+   const int IDX2 = GetIndex(c->R1, c->G1, c->B0, position);
+   const int IDX3 = GetIndex(c->R1, c->G0, c->B1, position);
+   const int IDX4 = GetIndex(c->R1, c->G0, c->B0, position);
+   const int IDX5 = GetIndex(c->R0, c->G1, c->B1, position);
+   const int IDX6 = GetIndex(c->R0, c->G1, c->B0, position);
+   const int IDX7 = GetIndex(c->R0, c->G0, c->B1, position);
+   const int IDX8 = GetIndex(c->R0, c->G0, c->B0, position);
+   Top(q->v, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, r, g, b, a, w);
 }
 
 __forceinline static float MaximizeR(Quantizer* quantizer, Box* cube, int first, int last, int* cut, float wholeR, float wholeG, float wholeB, float wholeA, float wholeW)
 {
-   int baseR = BottomR(cube, quantizer->vmr);
-   int baseG = BottomR(cube, quantizer->vmg);
-   int baseB = BottomR(cube, quantizer->vmb);
-   int baseA = BottomR(cube, quantizer->vma);
-   int baseW = BottomR(cube, quantizer->vwt);
+   int baseR, baseG, baseB, baseA, baseW;
+   BottomR(cube, quantizer, &baseR, &baseG, &baseB, &baseA, &baseW);
    float max = 0.0;
    *cut = -1;
    for (int i = first; i < last; i++)
    {
-      float halfR = (float)(baseR + TopR(cube, i, quantizer->vmr));
-      float halfG = (float)(baseG + TopR(cube, i, quantizer->vmg));
-      float halfB = (float)(baseB + TopR(cube, i, quantizer->vmb));
-      float halfA = (float)(baseA + TopR(cube, i, quantizer->vma));
-      float halfW = (float)(baseW + TopR(cube, i, quantizer->vwt));
+      int topR, topG, topB, topA, topW;
+      TopR(cube, i, quantizer, &topR, &topG, &topB, &topA, &topW);
+      float halfR = (float)(baseR + topR);
+      float halfG = (float)(baseG + topG);
+      float halfB = (float)(baseB + topB);
+      float halfA = (float)(baseA + topA);
+      float halfW = (float)(baseW + topW);
       if (halfW == 0) continue;
       float temp = ((halfR * halfR) + (halfG * halfG) + (halfB * halfB) + (halfA * halfA)) / halfW;
       halfR = wholeR - halfR;
@@ -141,20 +170,19 @@ __forceinline static float MaximizeR(Quantizer* quantizer, Box* cube, int first,
 }
 __forceinline static float MaximizeG(Quantizer* quantizer, Box* cube, int first, int last, int* cut, float wholeR, float wholeG, float wholeB, float wholeA, float wholeW)
 {
-   int baseR = BottomG(cube, quantizer->vmr);
-   int baseG = BottomG(cube, quantizer->vmg);
-   int baseB = BottomG(cube, quantizer->vmb);
-   int baseA = BottomG(cube, quantizer->vma);
-   int baseW = BottomG(cube, quantizer->vwt);
+   int baseR, baseG, baseB, baseA, baseW;
+   BottomG(cube, quantizer, &baseR, &baseG, &baseB, &baseA, &baseW);
    float max = 0.0;
    *cut = -1;
    for (int i = first; i < last; i++)
    {
-      float halfR = (float)(baseR + TopG(cube, i, quantizer->vmr));
-      float halfG = (float)(baseG + TopG(cube, i, quantizer->vmg));
-      float halfB = (float)(baseB + TopG(cube, i, quantizer->vmb));
-      float halfA = (float)(baseA + TopG(cube, i, quantizer->vma));
-      float halfW = (float)(baseW + TopG(cube, i, quantizer->vwt));
+      int topR, topG, topB, topA, topW;
+      TopG(cube, i, quantizer, &topR, &topG, &topB, &topA, &topW);
+      float halfR = (float)(baseR + topR);
+      float halfG = (float)(baseG + topG);
+      float halfB = (float)(baseB + topB);
+      float halfA = (float)(baseA + topA);
+      float halfW = (float)(baseW + topW);
       if (halfW == 0) continue;
       float temp = ((halfR * halfR) + (halfG * halfG) + (halfB * halfB) + (halfA * halfA)) / halfW;
       halfR = wholeR - halfR;
@@ -174,20 +202,19 @@ __forceinline static float MaximizeG(Quantizer* quantizer, Box* cube, int first,
 }
 __forceinline static float MaximizeB(Quantizer* quantizer, Box* cube, int first, int last, int* cut, float wholeR, float wholeG, float wholeB, float wholeA, float wholeW)
 {
-   int baseR = BottomB(cube, quantizer->vmr);
-   int baseG = BottomB(cube, quantizer->vmg);
-   int baseB = BottomB(cube, quantizer->vmb);
-   int baseA = BottomB(cube, quantizer->vma);
-   int baseW = BottomB(cube, quantizer->vwt);
+   int baseR, baseG, baseB, baseA, baseW;
+   BottomB(cube, quantizer, &baseR, &baseG, &baseB, &baseA, &baseW);
    float max = 0.0;
    *cut = -1;
    for (int i = first; i < last; i++)
    {
-      float halfR = (float)(baseR + TopB(cube, i, quantizer->vmr));
-      float halfG = (float)(baseG + TopB(cube, i, quantizer->vmg));
-      float halfB = (float)(baseB + TopB(cube, i, quantizer->vmb));
-      float halfA = (float)(baseA + TopB(cube, i, quantizer->vma));
-      float halfW = (float)(baseW + TopB(cube, i, quantizer->vwt));
+      int topR, topG, topB, topA, topW;
+      TopB(cube, i, quantizer, &topR, &topG, &topB, &topA, &topW);
+      float halfR = (float)(baseR + topR);
+      float halfG = (float)(baseG + topG);
+      float halfB = (float)(baseB + topB);
+      float halfA = (float)(baseA + topA);
+      float halfW = (float)(baseW + topW);
       if (halfW == 0) continue;
       float temp = ((halfR * halfR) + (halfG * halfG) + (halfB * halfB) + (halfA * halfA)) / halfW;
       halfR = wholeR - halfR;
@@ -207,20 +234,19 @@ __forceinline static float MaximizeB(Quantizer* quantizer, Box* cube, int first,
 }
 __forceinline static float MaximizeA(Quantizer* quantizer, Box* cube, int first, int last, int* cut, float wholeR, float wholeG, float wholeB, float wholeA, float wholeW)
 {
-   int baseR = BottomA(cube, quantizer->vmr);
-   int baseG = BottomA(cube, quantizer->vmg);
-   int baseB = BottomA(cube, quantizer->vmb);
-   int baseA = BottomA(cube, quantizer->vma);
-   int baseW = BottomA(cube, quantizer->vwt);
+   int baseR, baseG, baseB, baseA, baseW;
+   BottomA(cube, quantizer, &baseR, &baseG, &baseB, &baseA, &baseW);
    float max = 0.0;
    *cut = -1;
    for (int i = first; i < last; i++)
    {
-      float halfR = (float)(baseR + TopA(cube, i, quantizer->vmr));
-      float halfG = (float)(baseG + TopA(cube, i, quantizer->vmg));
-      float halfB = (float)(baseB + TopA(cube, i, quantizer->vmb));
-      float halfA = (float)(baseA + TopA(cube, i, quantizer->vma));
-      float halfW = (float)(baseW + TopA(cube, i, quantizer->vwt));
+      int topR, topG, topB, topA, topW;
+      TopA(cube, i, quantizer, &topR, &topG, &topB, &topA, &topW);
+      float halfR = (float)(baseR + topR);
+      float halfG = (float)(baseG + topG);
+      float halfB = (float)(baseB + topB);
+      float halfA = (float)(baseA + topA);
+      float halfW = (float)(baseW + topW);
       if (halfW == 0) continue;
       float temp = ((halfR * halfR) + (halfG * halfG) + (halfB * halfB) + (halfA * halfA)) / halfW;
       halfR = wholeR - halfR;
@@ -258,34 +284,31 @@ __forceinline static void VolumeRGBA(const Box* cube, const Quantizer* quantizer
    const int IDX15 = GetIndex(cube->R0, cube->G0, cube->B0, cube->A1);
    const int IDX16 = GetIndex(cube->R0, cube->G0, cube->B0, cube->A0);
 
-   const int* vmr = quantizer->vmr;
-   const int* vmg = quantizer->vmg;
-   const int* vmb = quantizer->vmb;
-   const int* vma = quantizer->vma;
+   const Moment* v = quantizer->v;
 
    *vR = (float)(
-      vmr[IDX1] - vmr[IDX2] - vmr[IDX3] + vmr[IDX4] -
-      vmr[IDX5] + vmr[IDX6] + vmr[IDX7] - vmr[IDX8] -
-      vmr[IDX9] + vmr[IDX10] + vmr[IDX11] - vmr[IDX12] +
-      vmr[IDX13] - vmr[IDX14] - vmr[IDX15] + vmr[IDX16]);
+      v[IDX1].R  - v[IDX2].R  - v[IDX3].R  + v[IDX4].R  -
+      v[IDX5].R  + v[IDX6].R  + v[IDX7].R  - v[IDX8].R  -
+      v[IDX9].R  + v[IDX10].R + v[IDX11].R - v[IDX12].R +
+      v[IDX13].R - v[IDX14].R - v[IDX15].R + v[IDX16].R);
 
    *vG = (float)(
-      vmg[IDX1] - vmg[IDX2] - vmg[IDX3] + vmg[IDX4] -
-      vmg[IDX5] + vmg[IDX6] + vmg[IDX7] - vmg[IDX8] -
-      vmg[IDX9] + vmg[IDX10] + vmg[IDX11] - vmg[IDX12] +
-      vmg[IDX13] - vmg[IDX14] - vmg[IDX15] + vmg[IDX16]);
+      v[IDX1].G  - v[IDX2].G  - v[IDX3].G  + v[IDX4].G  -
+      v[IDX5].G  + v[IDX6].G  + v[IDX7].G  - v[IDX8].G  -
+      v[IDX9].G  + v[IDX10].G + v[IDX11].G - v[IDX12].G +
+      v[IDX13].G - v[IDX14].G - v[IDX15].G + v[IDX16].G);
 
    *vB = (float)(
-      vmb[IDX1] - vmb[IDX2] - vmb[IDX3] + vmb[IDX4] -
-      vmb[IDX5] + vmb[IDX6] + vmb[IDX7] - vmb[IDX8] -
-      vmb[IDX9] + vmb[IDX10] + vmb[IDX11] - vmb[IDX12] +
-      vmb[IDX13] - vmb[IDX14] - vmb[IDX15] + vmb[IDX16]);
+      v[IDX1].B  - v[IDX2].B  - v[IDX3].B  + v[IDX4].B  -
+      v[IDX5].B  + v[IDX6].B  + v[IDX7].B  - v[IDX8].B  -
+      v[IDX9].B  + v[IDX10].B + v[IDX11].B - v[IDX12].B +
+      v[IDX13].B - v[IDX14].B - v[IDX15].B + v[IDX16].B);
 
    *vA = (float)(
-      vma[IDX1] - vma[IDX2] - vma[IDX3] + vma[IDX4] -
-      vma[IDX5] + vma[IDX6] + vma[IDX7] - vma[IDX8] -
-      vma[IDX9] + vma[IDX10] + vma[IDX11] - vma[IDX12] +
-      vma[IDX13] - vma[IDX14] - vma[IDX15] + vma[IDX16]);
+      v[IDX1].A  - v[IDX2].A  - v[IDX3].A  + v[IDX4].A  -
+      v[IDX5].A  + v[IDX6].A  + v[IDX7].A  - v[IDX8].A  -
+      v[IDX9].A  + v[IDX10].A + v[IDX11].A - v[IDX12].A +
+      v[IDX13].A - v[IDX14].A - v[IDX15].A + v[IDX16].A);
 }
 
 __forceinline static float VolumeVWT(const Box* cube, const Quantizer* quantizer)
@@ -307,13 +330,13 @@ __forceinline static float VolumeVWT(const Box* cube, const Quantizer* quantizer
    const int IDX15 = GetIndex(cube->R0, cube->G0, cube->B0, cube->A1);
    const int IDX16 = GetIndex(cube->R0, cube->G0, cube->B0, cube->A0);
 
-   const int* vwt = quantizer->vwt;
+   const Moment* v = quantizer->v;
 
    return (float)(
-      vwt[IDX1] - vwt[IDX2] - vwt[IDX3] + vwt[IDX4] -
-      vwt[IDX5] + vwt[IDX6] + vwt[IDX7] - vwt[IDX8] -
-      vwt[IDX9] + vwt[IDX10] + vwt[IDX11] - vwt[IDX12] +
-      vwt[IDX13] - vwt[IDX14] - vwt[IDX15] + vwt[IDX16]);
+      v[IDX1].V  - v[IDX2].V  - v[IDX3].V  + v[IDX4].V  -
+      v[IDX5].V  + v[IDX6].V  + v[IDX7].V  - v[IDX8].V  -
+      v[IDX9].V  + v[IDX10].V + v[IDX11].V - v[IDX12].V +
+      v[IDX13].V - v[IDX14].V - v[IDX15].V + v[IDX16].V);
 }
 
 __forceinline static float Variance(const Quantizer* quantizer, const Box* cube)
@@ -321,23 +344,30 @@ __forceinline static float Variance(const Quantizer* quantizer, const Box* cube)
    float dr, dg, db, da;
    VolumeRGBA(cube, quantizer, &dr, &dg, &db, &da);
 
+   const int IDX1 = GetIndex(cube->R1, cube->G1, cube->B1, cube->A1);
+   const int IDX2 = GetIndex(cube->R1, cube->G1, cube->B1, cube->A0);
+   const int IDX3 = GetIndex(cube->R1, cube->G1, cube->B0, cube->A1);
+   const int IDX4 = GetIndex(cube->R1, cube->G1, cube->B0, cube->A0);
+   const int IDX5 = GetIndex(cube->R1, cube->G0, cube->B1, cube->A1);
+   const int IDX6 = GetIndex(cube->R1, cube->G0, cube->B1, cube->A0);
+   const int IDX7 = GetIndex(cube->R1, cube->G0, cube->B0, cube->A1);
+   const int IDX8 = GetIndex(cube->R1, cube->G0, cube->B0, cube->A0);
+   const int IDX9 = GetIndex(cube->R0, cube->G1, cube->B1, cube->A1);
+   const int IDX10 = GetIndex(cube->R0, cube->G1, cube->B1, cube->A0);
+   const int IDX11 = GetIndex(cube->R0, cube->G1, cube->B0, cube->A1);
+   const int IDX12 = GetIndex(cube->R0, cube->G1, cube->B0, cube->A0);
+   const int IDX13 = GetIndex(cube->R0, cube->G0, cube->B1, cube->A1);
+   const int IDX14 = GetIndex(cube->R0, cube->G0, cube->B1, cube->A0);
+   const int IDX15 = GetIndex(cube->R0, cube->G0, cube->B0, cube->A1);
+   const int IDX16 = GetIndex(cube->R0, cube->G0, cube->B0, cube->A0);
+
+   const Moment* v = quantizer->v;
+
    float xx =
-      quantizer->m2[GetIndex(cube->R1, cube->G1, cube->B1, cube->A1)]
-      - quantizer->m2[GetIndex(cube->R1, cube->G1, cube->B1, cube->A0)]
-      - quantizer->m2[GetIndex(cube->R1, cube->G1, cube->B0, cube->A1)]
-      + quantizer->m2[GetIndex(cube->R1, cube->G1, cube->B0, cube->A0)]
-      - quantizer->m2[GetIndex(cube->R1, cube->G0, cube->B1, cube->A1)]
-      + quantizer->m2[GetIndex(cube->R1, cube->G0, cube->B1, cube->A0)]
-      + quantizer->m2[GetIndex(cube->R1, cube->G0, cube->B0, cube->A1)]
-      - quantizer->m2[GetIndex(cube->R1, cube->G0, cube->B0, cube->A0)]
-      - quantizer->m2[GetIndex(cube->R0, cube->G1, cube->B1, cube->A1)]
-      + quantizer->m2[GetIndex(cube->R0, cube->G1, cube->B1, cube->A0)]
-      + quantizer->m2[GetIndex(cube->R0, cube->G1, cube->B0, cube->A1)]
-      - quantizer->m2[GetIndex(cube->R0, cube->G1, cube->B0, cube->A0)]
-      + quantizer->m2[GetIndex(cube->R0, cube->G0, cube->B1, cube->A1)]
-      - quantizer->m2[GetIndex(cube->R0, cube->G0, cube->B1, cube->A0)]
-      - quantizer->m2[GetIndex(cube->R0, cube->G0, cube->B0, cube->A1)]
-      + quantizer->m2[GetIndex(cube->R0, cube->G0, cube->B0, cube->A0)];
+      + v[IDX1].V2  - v[IDX2].V2  - v[IDX3].V2  + v[IDX4].V2
+      - v[IDX5].V2  + v[IDX6].V2  + v[IDX7].V2  - v[IDX8].V2
+      - v[IDX9].V2  + v[IDX10].V2 + v[IDX11].V2 - v[IDX12].V2
+      + v[IDX13].V2 - v[IDX14].V2 - v[IDX15].V2 + v[IDX16].V2;
 
    return xx - (((dr * dr) + (dg * dg) + (db * db) + (da * da)) / VolumeVWT(cube, quantizer));
 }
@@ -444,12 +474,7 @@ __forceinline static void Mark(Quantizer* quantizer, Box* cube, char label)
 
 static void Clear(Quantizer* quantizer)
 {
-   memset(quantizer->vwt, 0, sizeof(quantizer->vwt));
-   memset(quantizer->vmr, 0, sizeof(quantizer->vmr));
-   memset(quantizer->vmg, 0, sizeof(quantizer->vmg));
-   memset(quantizer->vmb, 0, sizeof(quantizer->vmb));
-   memset(quantizer->vma, 0, sizeof(quantizer->vma));
-   memset(quantizer->m2, 0, sizeof(quantizer->m2));
+   memset(quantizer->v, 0, sizeof(quantizer->v));
    memset(quantizer->tag, 0, sizeof(quantizer->tag));
    memset(quantizer->cube, 0, sizeof(quantizer->cube));
 }
@@ -472,12 +497,12 @@ static void Build3DHistogram(Quantizer* quantizer, unsigned int* image, int widt
 
       int ind = GetIndex((int)inr + 1, (int)ing + 1, (int)inb + 1, (int)ina + 1);
 
-      quantizer->vwt[ind]++;
-      quantizer->vmr[ind] += r;
-      quantizer->vmg[ind] += g;
-      quantizer->vmb[ind] += b;
-      quantizer->vma[ind] += a;
-      quantizer->m2[ind] += (r * r) + (g * g) + (b * b) + (a * a);
+      quantizer->v[ind].V++;
+      quantizer->v[ind].R += r;
+      quantizer->v[ind].G += g;
+      quantizer->v[ind].B += b;
+      quantizer->v[ind].A += a;
+      quantizer->v[ind].V2 += (r * r) + (g * g) + (b * b) + (a * a);
    }
 }
 
@@ -504,12 +529,12 @@ static void Get3DMoments(Quantizer* quantizer)
             {
                int ind1 = GetIndex(r, g, b, a);
 
-               line += quantizer->vwt[ind1];
-               lineR += quantizer->vmr[ind1];
-               lineG += quantizer->vmg[ind1];
-               lineB += quantizer->vmb[ind1];
-               lineA += quantizer->vma[ind1];
-               line2 += quantizer->m2[ind1];
+               line += quantizer->v[ind1].V;
+               lineR += quantizer->v[ind1].R;
+               lineG += quantizer->v[ind1].G;
+               lineB += quantizer->v[ind1].B;
+               lineA += quantizer->v[ind1].A;
+               line2 += quantizer->v[ind1].V2;
 
                quantizer->area[a].V += line;
                quantizer->area[a].R += lineR;
@@ -529,12 +554,12 @@ static void Get3DMoments(Quantizer* quantizer)
 
                int ind2 = ind1 - GetIndex(1, 0, 0, 0);
 
-               quantizer->vwt[ind1] = quantizer->vwt[ind2] + quantizer->volume[inv].V;
-               quantizer->vmr[ind1] = quantizer->vmr[ind2] + quantizer->volume[inv].R;
-               quantizer->vmg[ind1] = quantizer->vmg[ind2] + quantizer->volume[inv].G;
-               quantizer->vmb[ind1] = quantizer->vmb[ind2] + quantizer->volume[inv].B;
-               quantizer->vma[ind1] = quantizer->vma[ind2] + quantizer->volume[inv].A;
-               quantizer->m2[ind1] = quantizer->m2[ind2] + quantizer->volume[inv].V2;
+               quantizer->v[ind1].V = quantizer->v[ind2].V + quantizer->volume[inv].V;
+               quantizer->v[ind1].R = quantizer->v[ind2].R + quantizer->volume[inv].R;
+               quantizer->v[ind1].G = quantizer->v[ind2].G + quantizer->volume[inv].G;
+               quantizer->v[ind1].B = quantizer->v[ind2].B + quantizer->volume[inv].B;
+               quantizer->v[ind1].A = quantizer->v[ind2].A + quantizer->volume[inv].A;
+               quantizer->v[ind1].V2 = quantizer->v[ind2].V2 + quantizer->volume[inv].V2;
             }
          }
       }

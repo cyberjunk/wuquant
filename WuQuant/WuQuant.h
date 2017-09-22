@@ -40,22 +40,17 @@ typedef struct
 
 typedef struct
 {
-   int V;
    int R;
    int G;
    int B;
    int A;
+   int V;
    float V2;
 } Moment;
 
 typedef struct
 {
-   int    vwt[TABLELENGTH];
-   int    vmr[TABLELENGTH];
-   int    vmg[TABLELENGTH];
-   int    vmb[TABLELENGTH];
-   int    vma[TABLELENGTH];
-   float  m2[TABLELENGTH];
+   Moment v[TABLELENGTH];
    char   tag[TABLELENGTH];
    Box    cube[MAXCOLORS];
    Moment volume[WORKARRAYSIZE];
