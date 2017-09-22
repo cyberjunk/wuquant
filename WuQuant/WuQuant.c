@@ -253,7 +253,7 @@ __forceinline static float MaximizeA(Quantizer* quantizer, Box* cube, int first,
    return max;
 }
 
-__forceinline static void VolumeRGBA(const Box* cube, const Quantizer* quantizer, V4f* col)
+__forceinline static void Volume(const Box* cube, const Quantizer* quantizer, V4f* col, float* w)
 {
    const int IDX1 = GetIndex(cube->R1, cube->G1, cube->B1, cube->A1);
    const int IDX2 = GetIndex(cube->R1, cube->G1, cube->B1, cube->A0);
@@ -290,30 +290,8 @@ __forceinline static void VolumeRGBA(const Box* cube, const Quantizer* quantizer
    __m128i s14 = _mm_sub_epi32(s13, v[IDX15].P.SSE);
    __m128i s15 = _mm_add_epi32(s14, v[IDX16].P.SSE);
    col->SSE = _mm_cvtepi32_ps(s15);
-}
 
-__forceinline static float VolumeVWT(const Box* cube, const Quantizer* quantizer)
-{
-   const int IDX1 = GetIndex(cube->R1, cube->G1, cube->B1, cube->A1);
-   const int IDX2 = GetIndex(cube->R1, cube->G1, cube->B1, cube->A0);
-   const int IDX3 = GetIndex(cube->R1, cube->G1, cube->B0, cube->A1);
-   const int IDX4 = GetIndex(cube->R1, cube->G1, cube->B0, cube->A0);
-   const int IDX5 = GetIndex(cube->R1, cube->G0, cube->B1, cube->A1);
-   const int IDX6 = GetIndex(cube->R1, cube->G0, cube->B1, cube->A0);
-   const int IDX7 = GetIndex(cube->R1, cube->G0, cube->B0, cube->A1);
-   const int IDX8 = GetIndex(cube->R1, cube->G0, cube->B0, cube->A0);
-   const int IDX9 = GetIndex(cube->R0, cube->G1, cube->B1, cube->A1);
-   const int IDX10 = GetIndex(cube->R0, cube->G1, cube->B1, cube->A0);
-   const int IDX11 = GetIndex(cube->R0, cube->G1, cube->B0, cube->A1);
-   const int IDX12 = GetIndex(cube->R0, cube->G1, cube->B0, cube->A0);
-   const int IDX13 = GetIndex(cube->R0, cube->G0, cube->B1, cube->A1);
-   const int IDX14 = GetIndex(cube->R0, cube->G0, cube->B1, cube->A0);
-   const int IDX15 = GetIndex(cube->R0, cube->G0, cube->B0, cube->A1);
-   const int IDX16 = GetIndex(cube->R0, cube->G0, cube->B0, cube->A0);
-
-   const Moment* v = quantizer->v;
-
-   return (float)(
+   *w = (float)(
       v[IDX1].V  - v[IDX2].V  - v[IDX3].V  + v[IDX4].V  -
       v[IDX5].V  + v[IDX6].V  + v[IDX7].V  - v[IDX8].V  -
       v[IDX9].V  + v[IDX10].V + v[IDX11].V - v[IDX12].V +
@@ -322,8 +300,8 @@ __forceinline static float VolumeVWT(const Box* cube, const Quantizer* quantizer
 
 __forceinline static float Variance(const Quantizer* quantizer, const Box* cube)
 {
-   V4f d;
-   VolumeRGBA(cube, quantizer, &d);
+   V4f d; float vol;
+   Volume(cube, quantizer, &d, &vol);
 
    const int IDX1 = GetIndex(cube->R1, cube->G1, cube->B1, cube->A1);
    const int IDX2 = GetIndex(cube->R1, cube->G1, cube->B1, cube->A0);
@@ -350,7 +328,6 @@ __forceinline static float Variance(const Quantizer* quantizer, const Box* cube)
       - v[IDX9].V2  + v[IDX10].V2 + v[IDX11].V2 - v[IDX12].V2
       + v[IDX13].V2 - v[IDX14].V2 - v[IDX15].V2 + v[IDX16].V2;
 
-   const float vol = VolumeVWT(cube, quantizer);
    const __m128 sub = _mm_div_ss(_mm_dp_ps(d.SSE, d.SSE, 0xF1), _mm_set_ss(vol));
 
    return xx - sub.m128_f32[0];
@@ -358,10 +335,8 @@ __forceinline static float Variance(const Quantizer* quantizer, const Box* cube)
 
 __forceinline static int Cut(Quantizer* quantizer, Box* set1, Box* set2)
 {
-   V4f whole;
-   VolumeRGBA(set1, quantizer, &whole);
-
-   float wholeW = VolumeVWT(set1, quantizer);
+   V4f whole; float wholeW;
+   Volume(set1, quantizer, &whole, &wholeW);
 
    int cutr;
    int cutg;
@@ -589,12 +564,11 @@ static void GenerateResult(Quantizer* quantizer, unsigned int* image, unsigned i
    {
       Mark(quantizer, &quantizer->cube[k], (char)k);
 
-      float weight = VolumeVWT(&quantizer->cube[k], quantizer);
+      V4f d; float weight;
+      Volume(&quantizer->cube[k], quantizer, &d, &weight);
 
       if (weight > 0.01 || weight < -0.01)
       {
-         V4f d;
-         VolumeRGBA(&quantizer->cube[k], quantizer, &d);
          d.R /= weight;
          d.G /= weight;
          d.B /= weight;
