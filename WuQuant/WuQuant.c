@@ -152,22 +152,19 @@ __forceinline static float MaximizeR(Quantizer* quantizer, Box* cube, int first,
    *cut = -1;
    for (int i = first; i < last; i++)
    {
-      V4i top; int topW;
+      V4i top; int topW; V4f half;
       TopR(cube, i, quantizer, &top, &topW);
-      float halfR = (float)(base.R + top.R);
-      float halfG = (float)(base.G + top.G);
-      float halfB = (float)(base.B + top.B);
-      float halfA = (float)(base.A + top.A);
+      half.SSE = _mm_cvtepi32_ps(_mm_add_epi32(base.SSE, top.SSE));
       float halfW = (float)(baseW + topW);
       if (halfW == 0) continue;
-      float temp = ((halfR * halfR) + (halfG * halfG) + (halfB * halfB) + (halfA * halfA)) / halfW;
-      halfR = wholeR - halfR;
-      halfG = wholeG - halfG;
-      halfB = wholeB - halfB;
-      halfA = wholeA - halfA;
+      float temp = ((half.R * half.R) + (half.G * half.G) + (half.B * half.B) + (half.A * half.A)) / halfW;
+      half.R = wholeR - half.R;
+      half.G = wholeG - half.G;
+      half.B = wholeB - half.B;
+      half.A = wholeA - half.A;
       halfW = wholeW - halfW;
       if (halfW == 0) continue;
-      temp += ((halfR * halfR) + (halfG * halfG) + (halfB * halfB) + (halfA * halfA)) / halfW;
+      temp += ((half.R * half.R) + (half.G * half.G) + (half.B * half.B) + (half.A * half.A)) / halfW;
       if (temp > max)
       {
          max = temp;
@@ -184,22 +181,19 @@ __forceinline static float MaximizeG(Quantizer* quantizer, Box* cube, int first,
    *cut = -1;
    for (int i = first; i < last; i++)
    {
-      V4i top; int topW;
+      V4i top; int topW; V4f half;
       TopG(cube, i, quantizer, &top, &topW);
-      float halfR = (float)(base.R + top.R);
-      float halfG = (float)(base.G + top.G);
-      float halfB = (float)(base.B + top.B);
-      float halfA = (float)(base.A + top.A);
+      half.SSE = _mm_cvtepi32_ps(_mm_add_epi32(base.SSE, top.SSE));
       float halfW = (float)(baseW + topW);
       if (halfW == 0) continue;
-      float temp = ((halfR * halfR) + (halfG * halfG) + (halfB * halfB) + (halfA * halfA)) / halfW;
-      halfR = wholeR - halfR;
-      halfG = wholeG - halfG;
-      halfB = wholeB - halfB;
-      halfA = wholeA - halfA;
+      float temp = ((half.R * half.R) + (half.G * half.G) + (half.B * half.B) + (half.A * half.A)) / halfW;
+      half.R = wholeR - half.R;
+      half.G = wholeG - half.G;
+      half.B = wholeB - half.B;
+      half.A = wholeA - half.A;
       halfW = wholeW - halfW;
       if (halfW == 0) continue;
-      temp += ((halfR * halfR) + (halfG * halfG) + (halfB * halfB) + (halfA * halfA)) / halfW;
+      temp += ((half.R * half.R) + (half.G * half.G) + (half.B * half.B) + (half.A * half.A)) / halfW;
       if (temp > max)
       {
          max = temp;
@@ -216,22 +210,19 @@ __forceinline static float MaximizeB(Quantizer* quantizer, Box* cube, int first,
    *cut = -1;
    for (int i = first; i < last; i++)
    {
-      V4i top; int topW;
+      V4i top; int topW; V4f half;
       TopB(cube, i, quantizer, &top, &topW);
-      float halfR = (float)(base.R + top.R);
-      float halfG = (float)(base.G + top.G);
-      float halfB = (float)(base.B + top.B);
-      float halfA = (float)(base.A + top.A);
+      half.SSE = _mm_cvtepi32_ps(_mm_add_epi32(base.SSE, top.SSE));
       float halfW = (float)(baseW + topW);
       if (halfW == 0) continue;
-      float temp = ((halfR * halfR) + (halfG * halfG) + (halfB * halfB) + (halfA * halfA)) / halfW;
-      halfR = wholeR - halfR;
-      halfG = wholeG - halfG;
-      halfB = wholeB - halfB;
-      halfA = wholeA - halfA;
+      float temp = ((half.R * half.R) + (half.G * half.G) + (half.B * half.B) + (half.A * half.A)) / halfW;
+      half.R = wholeR - half.R;
+      half.G = wholeG - half.G;
+      half.B = wholeB - half.B;
+      half.A = wholeA - half.A;
       halfW = wholeW - halfW;
       if (halfW == 0) continue;
-      temp += ((halfR * halfR) + (halfG * halfG) + (halfB * halfB) + (halfA * halfA)) / halfW;
+      temp += ((half.R * half.R) + (half.G * half.G) + (half.B * half.B) + (half.A * half.A)) / halfW;
       if (temp > max)
       {
          max = temp;
@@ -242,28 +233,25 @@ __forceinline static float MaximizeB(Quantizer* quantizer, Box* cube, int first,
 }
 __forceinline static float MaximizeA(Quantizer* quantizer, Box* cube, int first, int last, int* cut, float wholeR, float wholeG, float wholeB, float wholeA, float wholeW)
 {
-   V4i base; int baseW;
+   V4i base; int baseW; 
    BottomA(cube, quantizer, &base, &baseW);
    float max = 0.0;
    *cut = -1;
    for (int i = first; i < last; i++)
    {
-      V4i top; int topW;
+      V4i top; int topW; V4f half;
       TopA(cube, i, quantizer, &top, &topW);
-      float halfR = (float)(base.R + top.R);
-      float halfG = (float)(base.G + top.G);
-      float halfB = (float)(base.B + top.B);
-      float halfA = (float)(base.A + top.A);
+      half.SSE = _mm_cvtepi32_ps(_mm_add_epi32(base.SSE, top.SSE));
       float halfW = (float)(baseW + topW);
       if (halfW == 0) continue;
-      float temp = ((halfR * halfR) + (halfG * halfG) + (halfB * halfB) + (halfA * halfA)) / halfW;
-      halfR = wholeR - halfR;
-      halfG = wholeG - halfG;
-      halfB = wholeB - halfB;
-      halfA = wholeA - halfA;
+      float temp = ((half.R * half.R) + (half.G * half.G) + (half.B * half.B) + (half.A * half.A)) / halfW;
+      half.R = wholeR - half.R;
+      half.G = wholeG - half.G;
+      half.B = wholeB - half.B;
+      half.A = wholeA - half.A;
       halfW = wholeW - halfW;
       if (halfW == 0) continue;
-      temp += ((halfR * halfR) + (halfG * halfG) + (halfB * halfB) + (halfA * halfA)) / halfW;
+      temp += ((half.R * half.R) + (half.G * half.G) + (half.B * half.B) + (half.A * half.A)) / halfW;
       if (temp > max)
       {
          max = temp;

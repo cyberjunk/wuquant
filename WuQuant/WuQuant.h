@@ -32,6 +32,12 @@ typedef union __declspec(intrin_type) __declspec(align(16)) V4i
    struct { int R; int G; int B; int A; };
 } V4i;
 
+typedef union __declspec(intrin_type) __declspec(align(16)) V4f
+{
+   __m128 SSE;
+   struct { float R; float G; float B; float A; };
+} V4f;
+
 typedef struct
 {
    int R0;
