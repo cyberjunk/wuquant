@@ -463,27 +463,27 @@ static void Clear(Quantizer* quantizer)
 static void Build3DHistogram(Quantizer* quantizer, unsigned int* image, int width, int height)
 {
    const int pixels = width * height;
+
+   const __m128i AND = _mm_set_epi32(0xFF000000, 0x000000FF, 0x0000FF00, 0x00FF0000);
+   const __m128i SHIFT = _mm_set_epi32(24, 0, 8, 16);
+   const __m128i ONE = _mm_set1_epi32(1);
+   const __m128i SHIFTIDX = _mm_set_epi32(
+      8 - INDEXALPHABITS,
+      8 - INDEXBITS,
+      8 - INDEXBITS,
+      8 - INDEXBITS);
+
+   V4i p, in;
    for (int i = 0; i < pixels; i++)
    {
-      unsigned int pix = image[i];
-      unsigned int a = (pix & 0xFF000000) >> 24;
-      unsigned int r = (pix & 0x00FF0000) >> 16;
-      unsigned int g = (pix & 0x0000FF00) >> 8;
-      unsigned int b = pix & 0x000000FF;
+      p.SSE  = _mm_srlv_epi32(_mm_and_si128(_mm_set1_epi32(image[i]), AND), SHIFT);
+      in.SSE = _mm_add_epi32(_mm_srlv_epi32(p.SSE, SHIFTIDX), ONE);
 
-      unsigned int inr = r >> (8 - INDEXBITS);
-      unsigned int ing = g >> (8 - INDEXBITS);
-      unsigned int inb = b >> (8 - INDEXBITS);
-      unsigned int ina = a >> (8 - INDEXALPHABITS);
+      const int IDX = GetIndex(in.R, in.G, in.B, in.A);
 
-      const int ind = GetIndex((int)inr + 1, (int)ing + 1, (int)inb + 1, (int)ina + 1);
-
-      quantizer->v[ind].V++;
-      quantizer->v[ind].P.R += r;
-      quantizer->v[ind].P.G += g;
-      quantizer->v[ind].P.B += b;
-      quantizer->v[ind].P.A += a;
-      quantizer->v[ind].V2 += (r * r) + (g * g) + (b * b) + (a * a);
+      quantizer->v[IDX].P.SSE = _mm_add_epi32(quantizer->v[IDX].P.SSE, p.SSE);
+      quantizer->v[IDX].V++;
+      quantizer->v[IDX].V2 += (p.R * p.R) + (p.G * p.G) + (p.B * p.B) + (p.A * p.A);
    }
 }
 
