@@ -344,13 +344,16 @@ __forceinline static float Variance(const Quantizer* quantizer, const Box* cube)
 
    const Moment* v = quantizer->v;
 
-   float xx =
+   const float xx =
       + v[IDX1].V2  - v[IDX2].V2  - v[IDX3].V2  + v[IDX4].V2
       - v[IDX5].V2  + v[IDX6].V2  + v[IDX7].V2  - v[IDX8].V2
       - v[IDX9].V2  + v[IDX10].V2 + v[IDX11].V2 - v[IDX12].V2
       + v[IDX13].V2 - v[IDX14].V2 - v[IDX15].V2 + v[IDX16].V2;
 
-   return xx - (((d.R * d.R) + (d.G * d.G) + (d.B * d.B) + (d.A * d.A)) / VolumeVWT(cube, quantizer));
+   const float vol = VolumeVWT(cube, quantizer);
+   const __m128 sub = _mm_div_ss(_mm_dp_ps(d.SSE, d.SSE, 0xF1), _mm_set_ss(vol));
+
+   return xx - sub.m128_f32[0];
 }
 
 __forceinline static int Cut(Quantizer* quantizer, Box* set1, Box* set2)
@@ -462,7 +465,7 @@ static void Clear(Quantizer* quantizer)
 
 static void Build3DHistogram(Quantizer* quantizer, unsigned int* image, int width, int height)
 {
-   const int pixels = width * height;
+   const unsigned int PIXELS = width * height;
 
    const __m128i AND = _mm_set_epi32(0xFF000000, 0x000000FF, 0x0000FF00, 0x00FF0000);
    const __m128i SHIFT = _mm_set_epi32(24, 0, 8, 16);
@@ -474,7 +477,7 @@ static void Build3DHistogram(Quantizer* quantizer, unsigned int* image, int widt
       8 - INDEXBITS);
 
    V4i p, in;
-   for (int i = 0; i < pixels; i++)
+   for (unsigned int i = 0; i < PIXELS; i++)
    {
       p.SSE  = _mm_srlv_epi32(_mm_and_si128(_mm_set1_epi32(image[i]), AND), SHIFT);
       in.SSE = _mm_add_epi32(_mm_srlv_epi32(p.SSE, SHIFTIDX), ONE);
