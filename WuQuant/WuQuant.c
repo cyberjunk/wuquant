@@ -21,10 +21,10 @@ __forceinline static void Bottom(const Moment* m,
    const int IDX5, const int IDX6, const int IDX7, const int IDX8, 
    int* r, int* g, int* b, int* a, int* w)
 {
-   *r = -m[IDX1].R + m[IDX2].R + m[IDX3].R - m[IDX4].R + m[IDX5].R - m[IDX6].R - m[IDX7].R + m[IDX8].R;
-   *g = -m[IDX1].G + m[IDX2].G + m[IDX3].G - m[IDX4].G + m[IDX5].G - m[IDX6].G - m[IDX7].G + m[IDX8].G;
-   *b = -m[IDX1].B + m[IDX2].B + m[IDX3].B - m[IDX4].B + m[IDX5].B - m[IDX6].B - m[IDX7].B + m[IDX8].B;
-   *a = -m[IDX1].A + m[IDX2].A + m[IDX3].A - m[IDX4].A + m[IDX5].A - m[IDX6].A - m[IDX7].A + m[IDX8].A;
+   *r = -m[IDX1].P.R + m[IDX2].P.R + m[IDX3].P.R - m[IDX4].P.R + m[IDX5].P.R - m[IDX6].P.R - m[IDX7].P.R + m[IDX8].P.R;
+   *g = -m[IDX1].P.G + m[IDX2].P.G + m[IDX3].P.G - m[IDX4].P.G + m[IDX5].P.G - m[IDX6].P.G - m[IDX7].P.G + m[IDX8].P.G;
+   *b = -m[IDX1].P.B + m[IDX2].P.B + m[IDX3].P.B - m[IDX4].P.B + m[IDX5].P.B - m[IDX6].P.B - m[IDX7].P.B + m[IDX8].P.B;
+   *a = -m[IDX1].P.A + m[IDX2].P.A + m[IDX3].P.A - m[IDX4].P.A + m[IDX5].P.A - m[IDX6].P.A - m[IDX7].P.A + m[IDX8].P.A;
    *w = -m[IDX1].V + m[IDX2].V + m[IDX3].V - m[IDX4].V + m[IDX5].V - m[IDX6].V - m[IDX7].V + m[IDX8].V;
 }
 __forceinline static void BottomR(const Box* c, const Quantizer* q, int* r, int* g, int* b, int* a, int* w)
@@ -81,10 +81,10 @@ __forceinline static void Top(const Moment* m,
    const int IDX5, const int IDX6, const int IDX7, const int IDX8,
    int* r, int* g, int* b, int* a, int* w)
 {
-   *r = m[IDX1].R - m[IDX2].R - m[IDX3].R + m[IDX4].R - m[IDX5].R + m[IDX6].R + m[IDX7].R - m[IDX8].R;
-   *g = m[IDX1].G - m[IDX2].G - m[IDX3].G + m[IDX4].G - m[IDX5].G + m[IDX6].G + m[IDX7].G - m[IDX8].G;
-   *b = m[IDX1].B - m[IDX2].B - m[IDX3].B + m[IDX4].B - m[IDX5].B + m[IDX6].B + m[IDX7].B - m[IDX8].B;
-   *a = m[IDX1].A - m[IDX2].A - m[IDX3].A + m[IDX4].A - m[IDX5].A + m[IDX6].A + m[IDX7].A - m[IDX8].A;
+   *r = m[IDX1].P.R - m[IDX2].P.R - m[IDX3].P.R + m[IDX4].P.R - m[IDX5].P.R + m[IDX6].P.R + m[IDX7].P.R - m[IDX8].P.R;
+   *g = m[IDX1].P.G - m[IDX2].P.G - m[IDX3].P.G + m[IDX4].P.G - m[IDX5].P.G + m[IDX6].P.G + m[IDX7].P.G - m[IDX8].P.G;
+   *b = m[IDX1].P.B - m[IDX2].P.B - m[IDX3].P.B + m[IDX4].P.B - m[IDX5].P.B + m[IDX6].P.B + m[IDX7].P.B - m[IDX8].P.B;
+   *a = m[IDX1].P.A - m[IDX2].P.A - m[IDX3].P.A + m[IDX4].P.A - m[IDX5].P.A + m[IDX6].P.A + m[IDX7].P.A - m[IDX8].P.A;
    *w = m[IDX1].V - m[IDX2].V - m[IDX3].V + m[IDX4].V - m[IDX5].V + m[IDX6].V + m[IDX7].V - m[IDX8].V;
 }
 __forceinline static void TopR(const Box* c, const int position, const Quantizer* q, int* r, int* g, int* b, int* a, int* w)
@@ -287,28 +287,28 @@ __forceinline static void VolumeRGBA(const Box* cube, const Quantizer* quantizer
    const Moment* v = quantizer->v;
 
    *vR = (float)(
-      v[IDX1].R  - v[IDX2].R  - v[IDX3].R  + v[IDX4].R  -
-      v[IDX5].R  + v[IDX6].R  + v[IDX7].R  - v[IDX8].R  -
-      v[IDX9].R  + v[IDX10].R + v[IDX11].R - v[IDX12].R +
-      v[IDX13].R - v[IDX14].R - v[IDX15].R + v[IDX16].R);
+      v[IDX1].P.R  - v[IDX2].P.R  - v[IDX3].P.R  + v[IDX4].P.R  -
+      v[IDX5].P.R  + v[IDX6].P.R  + v[IDX7].P.R  - v[IDX8].P.R  -
+      v[IDX9].P.R  + v[IDX10].P.R + v[IDX11].P.R - v[IDX12].P.R +
+      v[IDX13].P.R - v[IDX14].P.R - v[IDX15].P.R + v[IDX16].P.R);
 
    *vG = (float)(
-      v[IDX1].G  - v[IDX2].G  - v[IDX3].G  + v[IDX4].G  -
-      v[IDX5].G  + v[IDX6].G  + v[IDX7].G  - v[IDX8].G  -
-      v[IDX9].G  + v[IDX10].G + v[IDX11].G - v[IDX12].G +
-      v[IDX13].G - v[IDX14].G - v[IDX15].G + v[IDX16].G);
+      v[IDX1].P.G  - v[IDX2].P.G  - v[IDX3].P.G  + v[IDX4].P.G  -
+      v[IDX5].P.G  + v[IDX6].P.G  + v[IDX7].P.G  - v[IDX8].P.G  -
+      v[IDX9].P.G  + v[IDX10].P.G + v[IDX11].P.G - v[IDX12].P.G +
+      v[IDX13].P.G - v[IDX14].P.G - v[IDX15].P.G + v[IDX16].P.G);
 
    *vB = (float)(
-      v[IDX1].B  - v[IDX2].B  - v[IDX3].B  + v[IDX4].B  -
-      v[IDX5].B  + v[IDX6].B  + v[IDX7].B  - v[IDX8].B  -
-      v[IDX9].B  + v[IDX10].B + v[IDX11].B - v[IDX12].B +
-      v[IDX13].B - v[IDX14].B - v[IDX15].B + v[IDX16].B);
+      v[IDX1].P.B  - v[IDX2].P.B  - v[IDX3].P.B  + v[IDX4].P.B  -
+      v[IDX5].P.B  + v[IDX6].P.B  + v[IDX7].P.B  - v[IDX8].P.B  -
+      v[IDX9].P.B  + v[IDX10].P.B + v[IDX11].P.B - v[IDX12].P.B +
+      v[IDX13].P.B - v[IDX14].P.B - v[IDX15].P.B + v[IDX16].P.B);
 
    *vA = (float)(
-      v[IDX1].A  - v[IDX2].A  - v[IDX3].A  + v[IDX4].A  -
-      v[IDX5].A  + v[IDX6].A  + v[IDX7].A  - v[IDX8].A  -
-      v[IDX9].A  + v[IDX10].A + v[IDX11].A - v[IDX12].A +
-      v[IDX13].A - v[IDX14].A - v[IDX15].A + v[IDX16].A);
+      v[IDX1].P.A  - v[IDX2].P.A  - v[IDX3].P.A  + v[IDX4].P.A  -
+      v[IDX5].P.A  + v[IDX6].P.A  + v[IDX7].P.A  - v[IDX8].P.A  -
+      v[IDX9].P.A  + v[IDX10].P.A + v[IDX11].P.A - v[IDX12].P.A +
+      v[IDX13].P.A - v[IDX14].P.A - v[IDX15].P.A + v[IDX16].P.A);
 }
 
 __forceinline static float VolumeVWT(const Box* cube, const Quantizer* quantizer)
@@ -495,19 +495,21 @@ static void Build3DHistogram(Quantizer* quantizer, unsigned int* image, int widt
       unsigned int inb = b >> (8 - INDEXBITS);
       unsigned int ina = a >> (8 - INDEXALPHABITS);
 
-      int ind = GetIndex((int)inr + 1, (int)ing + 1, (int)inb + 1, (int)ina + 1);
+      const int ind = GetIndex((int)inr + 1, (int)ing + 1, (int)inb + 1, (int)ina + 1);
 
       quantizer->v[ind].V++;
-      quantizer->v[ind].R += r;
-      quantizer->v[ind].G += g;
-      quantizer->v[ind].B += b;
-      quantizer->v[ind].A += a;
+      quantizer->v[ind].P.R += r;
+      quantizer->v[ind].P.G += g;
+      quantizer->v[ind].P.B += b;
+      quantizer->v[ind].P.A += a;
       quantizer->v[ind].V2 += (r * r) + (g * g) + (b * b) + (a * a);
    }
 }
 
 static void Get3DMoments(Quantizer* quantizer)
 {
+   V4i l;
+
    for (int r = 1; r < INDEXCOUNT; r++)
    {
       memset(quantizer->volume, 0, sizeof(quantizer->volume));
@@ -518,47 +520,44 @@ static void Get3DMoments(Quantizer* quantizer)
 
          for (int b = 1; b < INDEXCOUNT; b++)
          {
-            int line = 0;
-            int lineR = 0;
-            int lineG = 0;
-            int lineB = 0;
-            int lineA = 0;
-            float line2 = 0;
+            l.A = 0;l.B = 0;l.G = 0;l.R = 0;
+            int v = 0;
+            float v2 = 0;
 
             for (int a = 1; a < INDEXALPHACOUNT; a++)
             {
                int ind1 = GetIndex(r, g, b, a);
 
-               line += quantizer->v[ind1].V;
-               lineR += quantizer->v[ind1].R;
-               lineG += quantizer->v[ind1].G;
-               lineB += quantizer->v[ind1].B;
-               lineA += quantizer->v[ind1].A;
-               line2 += quantizer->v[ind1].V2;
+               l.R += quantizer->v[ind1].P.R;
+               l.G += quantizer->v[ind1].P.G;
+               l.B += quantizer->v[ind1].P.B;
+               l.A += quantizer->v[ind1].P.A;
+               v  += quantizer->v[ind1].V;
+               v2 += quantizer->v[ind1].V2;
 
-               quantizer->area[a].V += line;
-               quantizer->area[a].R += lineR;
-               quantizer->area[a].G += lineG;
-               quantizer->area[a].B += lineB;
-               quantizer->area[a].A += lineA;
-               quantizer->area[a].V2 += line2;
+               quantizer->area[a].P.R += l.R;
+               quantizer->area[a].P.G += l.G;
+               quantizer->area[a].P.B += l.B;
+               quantizer->area[a].P.A += l.A;
+               quantizer->area[a].V  += v;
+               quantizer->area[a].V2 += v2;
 
                int inv = (b * INDEXALPHACOUNT) + a;
 
-               quantizer->volume[inv].V += quantizer->area[a].V;
-               quantizer->volume[inv].R += quantizer->area[a].R;
-               quantizer->volume[inv].G += quantizer->area[a].G;
-               quantizer->volume[inv].B += quantizer->area[a].B;
-               quantizer->volume[inv].A += quantizer->area[a].A;
+               quantizer->volume[inv].P.R += quantizer->area[a].P.R;
+               quantizer->volume[inv].P.G += quantizer->area[a].P.G;
+               quantizer->volume[inv].P.B += quantizer->area[a].P.B;
+               quantizer->volume[inv].P.A += quantizer->area[a].P.A;
+               quantizer->volume[inv].V  += quantizer->area[a].V;
                quantizer->volume[inv].V2 += quantizer->area[a].V2;
 
                int ind2 = ind1 - GetIndex(1, 0, 0, 0);
 
-               quantizer->v[ind1].V = quantizer->v[ind2].V + quantizer->volume[inv].V;
-               quantizer->v[ind1].R = quantizer->v[ind2].R + quantizer->volume[inv].R;
-               quantizer->v[ind1].G = quantizer->v[ind2].G + quantizer->volume[inv].G;
-               quantizer->v[ind1].B = quantizer->v[ind2].B + quantizer->volume[inv].B;
-               quantizer->v[ind1].A = quantizer->v[ind2].A + quantizer->volume[inv].A;
+               quantizer->v[ind1].P.R = quantizer->v[ind2].P.R + quantizer->volume[inv].P.R;
+               quantizer->v[ind1].P.G = quantizer->v[ind2].P.G + quantizer->volume[inv].P.G;
+               quantizer->v[ind1].P.B = quantizer->v[ind2].P.B + quantizer->volume[inv].P.B;
+               quantizer->v[ind1].P.A = quantizer->v[ind2].P.A + quantizer->volume[inv].P.A;
+               quantizer->v[ind1].V  = quantizer->v[ind2].V + quantizer->volume[inv].V;
                quantizer->v[ind1].V2 = quantizer->v[ind2].V2 + quantizer->volume[inv].V2;
             }
          }

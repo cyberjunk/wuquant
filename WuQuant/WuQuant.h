@@ -1,5 +1,7 @@
 #pragma once
 
+#include <intrin.h>
+
 #if defined(_MSC_VER)
 //  Microsoft 
 #define EXPORT __declspec(dllexport)
@@ -24,6 +26,12 @@
 #define WORKARRAYSIZE   (INDEXCOUNT * INDEXALPHACOUNT)
 #define TABLELENGTH     (INDEXCOUNT * INDEXCOUNT * INDEXCOUNT * INDEXALPHACOUNT)
 
+typedef union __declspec(intrin_type) __declspec(align(16)) V4i
+{
+   __m128i SSE;
+   struct { int R; int G; int B; int A; };
+} V4i;
+
 typedef struct
 {
    int R0;
@@ -40,10 +48,7 @@ typedef struct
 
 typedef struct
 {
-   int R;
-   int G;
-   int B;
-   int A;
+   V4i P;
    int V;
    float V2;
 } Moment;
