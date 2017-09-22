@@ -528,43 +528,32 @@ static void Get3DMoments(Quantizer* quantizer)
 
          for (int b = 1; b < INDEXCOUNT; b++)
          {
-            l.A = 0;l.B = 0;l.G = 0;l.R = 0;
+            l.SSE = _mm_setzero_si128();
+
             int v = 0;
             float v2 = 0;
 
             for (int a = 1; a < INDEXALPHACOUNT; a++)
             {
-               int ind1 = GetIndex(r, g, b, a);
+               const int ind1 = GetIndex(r, g, b, a);
 
-               l.R += quantizer->v[ind1].P.R;
-               l.G += quantizer->v[ind1].P.G;
-               l.B += quantizer->v[ind1].P.B;
-               l.A += quantizer->v[ind1].P.A;
+               l.SSE = _mm_add_epi32(l.SSE, quantizer->v[ind1].P.SSE);
                v  += quantizer->v[ind1].V;
                v2 += quantizer->v[ind1].V2;
 
-               quantizer->area[a].P.R += l.R;
-               quantizer->area[a].P.G += l.G;
-               quantizer->area[a].P.B += l.B;
-               quantizer->area[a].P.A += l.A;
+               quantizer->area[a].P.SSE = _mm_add_epi32(quantizer->area[a].P.SSE, l.SSE);
                quantizer->area[a].V  += v;
                quantizer->area[a].V2 += v2;
 
-               int inv = (b * INDEXALPHACOUNT) + a;
+               const int inv = (b * INDEXALPHACOUNT) + a;
 
-               quantizer->volume[inv].P.R += quantizer->area[a].P.R;
-               quantizer->volume[inv].P.G += quantizer->area[a].P.G;
-               quantizer->volume[inv].P.B += quantizer->area[a].P.B;
-               quantizer->volume[inv].P.A += quantizer->area[a].P.A;
+               quantizer->volume[inv].P.SSE = _mm_add_epi32(quantizer->volume[inv].P.SSE, quantizer->area[a].P.SSE);
                quantizer->volume[inv].V  += quantizer->area[a].V;
                quantizer->volume[inv].V2 += quantizer->area[a].V2;
 
-               int ind2 = ind1 - GetIndex(1, 0, 0, 0);
+               const int ind2 = ind1 - GetIndex(1, 0, 0, 0);
 
-               quantizer->v[ind1].P.R = quantizer->v[ind2].P.R + quantizer->volume[inv].P.R;
-               quantizer->v[ind1].P.G = quantizer->v[ind2].P.G + quantizer->volume[inv].P.G;
-               quantizer->v[ind1].P.B = quantizer->v[ind2].P.B + quantizer->volume[inv].P.B;
-               quantizer->v[ind1].P.A = quantizer->v[ind2].P.A + quantizer->volume[inv].P.A;
+               quantizer->v[ind1].P.SSE = _mm_add_epi32(quantizer->v[ind2].P.SSE, quantizer->volume[inv].P.SSE);
                quantizer->v[ind1].V  = quantizer->v[ind2].V + quantizer->volume[inv].V;
                quantizer->v[ind1].V2 = quantizer->v[ind2].V2 + quantizer->volume[inv].V2;
             }
