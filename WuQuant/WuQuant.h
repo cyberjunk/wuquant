@@ -1,22 +1,20 @@
 #pragma once
 
-#include <intrin.h>
-
 #if defined(_MSC_VER)
-//  Microsoft 
+//  Microsoft
+#include <intrin.h>
 #define EXPORT __declspec(dllexport)
 #define IMPORT __declspec(dllimport)
+#define SIMD_TYPE __declspec(intrin_type) __declspec(align(16))
 #elif defined(__GNUC__)
 //  GCC
+#include <x86intrin.h>
 #define EXPORT __attribute__((visibility("default")))
 #define IMPORT
+#define SIMD_TYPE __attribute__((aligned(16)))
 #define __forceinline inline __attribute__((always_inline))
-#else
-//  do nothing and hope for the best?
-#define EXPORT
-#define IMPORT
-#pragma warning Unknown dynamic link import/export semantics.
 #endif
+
 
 #define MAXCOLORS       256
 #define INDEXBITS       6
@@ -26,13 +24,13 @@
 #define WORKARRAYSIZE   (INDEXCOUNT * INDEXALPHACOUNT)
 #define TABLELENGTH     (INDEXCOUNT * INDEXCOUNT * INDEXCOUNT * INDEXALPHACOUNT)
 
-typedef union __declspec(intrin_type) __declspec(align(16)) V4i
+typedef union SIMD_TYPE V4i
 {
    __m128i SSE;
    struct { int R; int G; int B; int A; };
 } V4i;
 
-typedef union __declspec(intrin_type) __declspec(align(16)) V4f
+typedef union SIMD_TYPE V4f
 {
    __m128 SSE;
    struct { float R; float G; float B; float A; };

@@ -175,7 +175,7 @@ __forceinline static void Maximize(const Quantizer* quantizer, const Box* cube, 
       halfW = wholeW - halfW;
       if (halfW == 0) continue;
       temp = _mm_add_ss(temp, _mm_div_ss(_mm_dp_ps(half.SSE, half.SSE, 0xF1), _mm_set_ss(halfW)));
-      tf = temp.m128_f32[0];
+      tf = _mm_cvtss_f32(temp);
       if (tf > max)
       {
          max = tf;
@@ -200,7 +200,7 @@ __forceinline static void Maximize(const Quantizer* quantizer, const Box* cube, 
       halfW = wholeW - halfW;
       if (halfW == 0) continue;
       temp = _mm_add_ss(temp, _mm_div_ss(_mm_dp_ps(half.SSE, half.SSE, 0xF1), _mm_set_ss(halfW)));
-      tf = temp.m128_f32[0];
+      tf = _mm_cvtss_f32(temp);
       if (tf > max)
       {
          max = tf;
@@ -225,7 +225,7 @@ __forceinline static void Maximize(const Quantizer* quantizer, const Box* cube, 
       halfW = wholeW - halfW;
       if (halfW == 0) continue;
       temp = _mm_add_ss(temp, _mm_div_ss(_mm_dp_ps(half.SSE, half.SSE, 0xF1), _mm_set_ss(halfW)));
-      tf = temp.m128_f32[0];
+      tf = _mm_cvtss_f32(temp);
       if (tf > max)
       {
          max = tf;
@@ -250,7 +250,7 @@ __forceinline static void Maximize(const Quantizer* quantizer, const Box* cube, 
       halfW = wholeW - halfW;
       if (halfW == 0) continue;
       temp = _mm_add_ss(temp, _mm_div_ss(_mm_dp_ps(half.SSE, half.SSE, 0xF1), _mm_set_ss(halfW)));
-      tf = temp.m128_f32[0];
+      tf = _mm_cvtss_f32(temp);
       if (tf > max)
       {
          max = tf;
@@ -349,9 +349,7 @@ __forceinline static float Variance(const Moment* m, const Box* c)
       IDX9, IDX10, IDX11, IDX12, IDX13, IDX14, IDX15, IDX16,
       &d, &vol);
 
-   const __m128 sub = _mm_div_ss(_mm_dp_ps(d.SSE, d.SSE, 0xF1), _mm_set_ss(vol));
-
-   return xx - sub.m128_f32[0];
+   return xx - _mm_cvtss_f32(_mm_div_ss(_mm_dp_ps(d.SSE, d.SSE, 0xF1), _mm_set_ss(vol)));
 }
 
 __forceinline static int Cut(const Quantizer* quantizer, Box* set1, Box* set2)
@@ -422,9 +420,18 @@ static void Build3DHistogram(Moment* m, unsigned int* image, int width, int heig
    for (unsigned int i = 0; i < PIXELS; i++)
    {
       V4i p, in;
-      p.SSE  = _mm_srlv_epi32(_mm_and_si128(_mm_set1_epi32(image[i]), MASK_AND), MASK_SHIFT);
-      in.SSE = _mm_add_epi32(_mm_srlv_epi32(p.SSE, MASK_SHIFTIDX), MASK_ONE);
-      const unsigned int IDX = GetIndex(in.R, in.G, in.B, in.A);
+      unsigned int pix = image[i];
+
+      p.A = (pix & 0xFF000000) >> 24;
+      p.R = (pix & 0x00FF0000) >> 16;
+      p.G = (pix & 0x0000FF00) >> 8;
+      p.B = pix & 0x000000FF;
+      in.R = p.R >> (8 - INDEXBITS);
+      in.G = p.G >> (8 - INDEXBITS);
+      in.B = p.B >> (8 - INDEXBITS);
+      in.A = p.A >> (8 - INDEXALPHABITS);
+      const unsigned int IDX = GetIndex((int)in.R + 1, (int)in.G + 1, (int)in.B + 1, (int)in.A + 1);
+
       m[IDX].P.SSE = _mm_add_epi32(m[IDX].P.SSE, p.SSE);
       m[IDX].V++;
       m[IDX].V2 += (p.R * p.R) + (p.G * p.G) + (p.B * p.B) + (p.A * p.A);
@@ -524,7 +531,8 @@ static void GenerateResult(
    int           padMultiple4)
 {
    V4f d; float weight;
-   V4i di; V4i in;
+   V4i di; 
+   //V4i in;
 
    // rows must be a multiple of 4, hence padding up to 3 bytes for 8-bit indexed pixels
    const unsigned int WIDTHMOD4 = width % 4;
@@ -552,10 +560,13 @@ static void GenerateResult(
    {
       for (unsigned int ci = 0; ci < width; ci++)
       {
-         in.SSE = _mm_add_epi32(_mm_srlv_epi32(_mm_srlv_epi32(_mm_and_si128(
-            _mm_set1_epi32(image[0]), MASK_AND), MASK_SHIFT), MASK_SHIFTIDX), MASK_ONE);
-         
-         const unsigned int IDX = GetIndex(in.R, in.G, in.B, in.A);
+         const unsigned int pix = image[0];
+
+         const unsigned int a = ((pix & 0xFF000000) >> 24) >> (8 - INDEXALPHABITS);
+         const unsigned int r = ((pix & 0x00FF0000) >> 16) >> (8 - INDEXBITS);
+         const unsigned int g = ((pix & 0x0000FF00) >> 8) >> (8 - INDEXBITS);
+         const unsigned int b = (pix & 0x000000FF) >> (8 - INDEXBITS);
+         const unsigned int IDX = GetIndex(r + 1, g + 1, b + 1, a + 1);
 
          destPixels[0] = quantizer->tag[IDX];
          destPixels++;
