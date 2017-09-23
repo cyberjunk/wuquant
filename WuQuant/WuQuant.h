@@ -40,14 +40,8 @@ typedef union __declspec(intrin_type) __declspec(align(16)) V4f
 
 typedef struct
 {
-   int R0;
-   int R1;
-   int G0;
-   int G1;
-   int B0;
-   int B1;
-   int A0;
-   int A1;
+   V4i P0;
+   V4i P1;
    int Volume;
    float vv;
 } Box;

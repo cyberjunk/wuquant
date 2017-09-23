@@ -37,53 +37,53 @@ __forceinline static void Bottom(const Moment* m,
    v->SSE = _mm_add_epi32(s8, m[IDX8].P.SSE);
    *w = -m[IDX1].V + m[IDX2].V + m[IDX3].V - m[IDX4].V + m[IDX5].V - m[IDX6].V - m[IDX7].V + m[IDX8].V;
 }
-__forceinline static void BottomR(const Box* c, const Quantizer* q, V4i* v, int* w)
+__forceinline static void BottomR(const Box* c, const Moment* m, V4i* v, int* w)
 {
-   const int IDX1 = GetIndex(c->R0, c->G1, c->B1, c->A1);
-   const int IDX2 = GetIndex(c->R0, c->G1, c->B1, c->A0);
-   const int IDX3 = GetIndex(c->R0, c->G1, c->B0, c->A1);
-   const int IDX4 = GetIndex(c->R0, c->G1, c->B0, c->A0);
-   const int IDX5 = GetIndex(c->R0, c->G0, c->B1, c->A1);
-   const int IDX6 = GetIndex(c->R0, c->G0, c->B1, c->A0);
-   const int IDX7 = GetIndex(c->R0, c->G0, c->B0, c->A1);
-   const int IDX8 = GetIndex(c->R0, c->G0, c->B0, c->A0);
-   Bottom(q->v, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, v, w);
+   const int IDX1 = GetIndex(c->P0.R, c->P1.G, c->P1.B, c->P1.A);
+   const int IDX2 = GetIndex(c->P0.R, c->P1.G, c->P1.B, c->P0.A);
+   const int IDX3 = GetIndex(c->P0.R, c->P1.G, c->P0.B, c->P1.A);
+   const int IDX4 = GetIndex(c->P0.R, c->P1.G, c->P0.B, c->P0.A);
+   const int IDX5 = GetIndex(c->P0.R, c->P0.G, c->P1.B, c->P1.A);
+   const int IDX6 = GetIndex(c->P0.R, c->P0.G, c->P1.B, c->P0.A);
+   const int IDX7 = GetIndex(c->P0.R, c->P0.G, c->P0.B, c->P1.A);
+   const int IDX8 = GetIndex(c->P0.R, c->P0.G, c->P0.B, c->P0.A);
+   Bottom(m, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, v, w);
 }
-__forceinline static void BottomG(const Box* c, const Quantizer* q, V4i* v, int* w)
+__forceinline static void BottomG(const Box* c, const Moment* m, V4i* v, int* w)
 {
-   const int IDX1 = GetIndex(c->R1, c->G0, c->B1, c->A1);
-   const int IDX2 = GetIndex(c->R1, c->G0, c->B1, c->A0);
-   const int IDX3 = GetIndex(c->R1, c->G0, c->B0, c->A1);
-   const int IDX4 = GetIndex(c->R1, c->G0, c->B0, c->A0);
-   const int IDX5 = GetIndex(c->R0, c->G0, c->B1, c->A1);
-   const int IDX6 = GetIndex(c->R0, c->G0, c->B1, c->A0);
-   const int IDX7 = GetIndex(c->R0, c->G0, c->B0, c->A1);
-   const int IDX8 = GetIndex(c->R0, c->G0, c->B0, c->A0);
-   Bottom(q->v, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, v, w);
+   const int IDX1 = GetIndex(c->P1.R, c->P0.G, c->P1.B, c->P1.A);
+   const int IDX2 = GetIndex(c->P1.R, c->P0.G, c->P1.B, c->P0.A);
+   const int IDX3 = GetIndex(c->P1.R, c->P0.G, c->P0.B, c->P1.A);
+   const int IDX4 = GetIndex(c->P1.R, c->P0.G, c->P0.B, c->P0.A);
+   const int IDX5 = GetIndex(c->P0.R, c->P0.G, c->P1.B, c->P1.A);
+   const int IDX6 = GetIndex(c->P0.R, c->P0.G, c->P1.B, c->P0.A);
+   const int IDX7 = GetIndex(c->P0.R, c->P0.G, c->P0.B, c->P1.A);
+   const int IDX8 = GetIndex(c->P0.R, c->P0.G, c->P0.B, c->P0.A);
+   Bottom(m, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, v, w);
 }
-__forceinline static void BottomB(const Box* c, const Quantizer* q, V4i* v, int* w)
+__forceinline static void BottomB(const Box* c, const Moment* m, V4i* v, int* w)
 {
-   const int IDX1 = GetIndex(c->R1, c->G1, c->B0, c->A1);
-   const int IDX2 = GetIndex(c->R1, c->G1, c->B0, c->A0);
-   const int IDX3 = GetIndex(c->R1, c->G0, c->B0, c->A1);
-   const int IDX4 = GetIndex(c->R1, c->G0, c->B0, c->A0);
-   const int IDX5 = GetIndex(c->R0, c->G1, c->B0, c->A1);
-   const int IDX6 = GetIndex(c->R0, c->G1, c->B0, c->A0);
-   const int IDX7 = GetIndex(c->R0, c->G0, c->B0, c->A1);
-   const int IDX8 = GetIndex(c->R0, c->G0, c->B0, c->A0);
-   Bottom(q->v, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, v, w);
+   const int IDX1 = GetIndex(c->P1.R, c->P1.G, c->P0.B, c->P1.A);
+   const int IDX2 = GetIndex(c->P1.R, c->P1.G, c->P0.B, c->P0.A);
+   const int IDX3 = GetIndex(c->P1.R, c->P0.G, c->P0.B, c->P1.A);
+   const int IDX4 = GetIndex(c->P1.R, c->P0.G, c->P0.B, c->P0.A);
+   const int IDX5 = GetIndex(c->P0.R, c->P1.G, c->P0.B, c->P1.A);
+   const int IDX6 = GetIndex(c->P0.R, c->P1.G, c->P0.B, c->P0.A);
+   const int IDX7 = GetIndex(c->P0.R, c->P0.G, c->P0.B, c->P1.A);
+   const int IDX8 = GetIndex(c->P0.R, c->P0.G, c->P0.B, c->P0.A);
+   Bottom(m, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, v, w);
 }
-__forceinline static void BottomA(const Box* c, const Quantizer* q, V4i* v, int* w)
+__forceinline static void BottomA(const Box* c, const Moment* m, V4i* v, int* w)
 {
-   const int IDX1 = GetIndex(c->R1, c->G1, c->B1, c->A0);
-   const int IDX2 = GetIndex(c->R1, c->G1, c->B0, c->A0);
-   const int IDX3 = GetIndex(c->R1, c->G0, c->B1, c->A0);
-   const int IDX4 = GetIndex(c->R1, c->G0, c->B0, c->A0);
-   const int IDX5 = GetIndex(c->R0, c->G1, c->B1, c->A0);
-   const int IDX6 = GetIndex(c->R0, c->G1, c->B0, c->A0);
-   const int IDX7 = GetIndex(c->R0, c->G0, c->B1, c->A0);
-   const int IDX8 = GetIndex(c->R0, c->G0, c->B0, c->A0);
-   Bottom(q->v, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, v, w);
+   const int IDX1 = GetIndex(c->P1.R, c->P1.G, c->P1.B, c->P0.A);
+   const int IDX2 = GetIndex(c->P1.R, c->P1.G, c->P0.B, c->P0.A);
+   const int IDX3 = GetIndex(c->P1.R, c->P0.G, c->P1.B, c->P0.A);
+   const int IDX4 = GetIndex(c->P1.R, c->P0.G, c->P0.B, c->P0.A);
+   const int IDX5 = GetIndex(c->P0.R, c->P1.G, c->P1.B, c->P0.A);
+   const int IDX6 = GetIndex(c->P0.R, c->P1.G, c->P0.B, c->P0.A);
+   const int IDX7 = GetIndex(c->P0.R, c->P0.G, c->P1.B, c->P0.A);
+   const int IDX8 = GetIndex(c->P0.R, c->P0.G, c->P0.B, c->P0.A);
+   Bottom(m, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, v, w);
 }
 
 __forceinline static void Top(const Moment* m,
@@ -100,53 +100,53 @@ __forceinline static void Top(const Moment* m,
    v->SSE = _mm_sub_epi32(s6, m[IDX8].P.SSE);
    *w = m[IDX1].V - m[IDX2].V - m[IDX3].V + m[IDX4].V - m[IDX5].V + m[IDX6].V + m[IDX7].V - m[IDX8].V;
 }
-__forceinline static void TopR(const Box* c, const int position, const Quantizer* q, V4i* v, int* w)
+__forceinline static void TopR(const Box* c, const int position, const Moment* m, V4i* v, int* w)
 {
-   const int IDX1 = GetIndex(position, c->G1, c->B1, c->A1);
-   const int IDX2 = GetIndex(position, c->G1, c->B1, c->A0);
-   const int IDX3 = GetIndex(position, c->G1, c->B0, c->A1);
-   const int IDX4 = GetIndex(position, c->G1, c->B0, c->A0);
-   const int IDX5 = GetIndex(position, c->G0, c->B1, c->A1);
-   const int IDX6 = GetIndex(position, c->G0, c->B1, c->A0);
-   const int IDX7 = GetIndex(position, c->G0, c->B0, c->A1);
-   const int IDX8 = GetIndex(position, c->G0, c->B0, c->A0);
-   Top(q->v, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, v, w);
+   const int IDX1 = GetIndex(position, c->P1.G, c->P1.B, c->P1.A);
+   const int IDX2 = GetIndex(position, c->P1.G, c->P1.B, c->P0.A);
+   const int IDX3 = GetIndex(position, c->P1.G, c->P0.B, c->P1.A);
+   const int IDX4 = GetIndex(position, c->P1.G, c->P0.B, c->P0.A);
+   const int IDX5 = GetIndex(position, c->P0.G, c->P1.B, c->P1.A);
+   const int IDX6 = GetIndex(position, c->P0.G, c->P1.B, c->P0.A);
+   const int IDX7 = GetIndex(position, c->P0.G, c->P0.B, c->P1.A);
+   const int IDX8 = GetIndex(position, c->P0.G, c->P0.B, c->P0.A);
+   Top(m, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, v, w);
 }
-__forceinline static void TopG(const Box* c, const int position, const Quantizer* q, V4i* v, int* w)
+__forceinline static void TopG(const Box* c, const int position, const Moment* m, V4i* v, int* w)
 {
-   const int IDX1 = GetIndex(c->R1, position, c->B1, c->A1);
-   const int IDX2 = GetIndex(c->R1, position, c->B1, c->A0);
-   const int IDX3 = GetIndex(c->R1, position, c->B0, c->A1);
-   const int IDX4 = GetIndex(c->R1, position, c->B0, c->A0);
-   const int IDX5 = GetIndex(c->R0, position, c->B1, c->A1);
-   const int IDX6 = GetIndex(c->R0, position, c->B1, c->A0);
-   const int IDX7 = GetIndex(c->R0, position, c->B0, c->A1);
-   const int IDX8 = GetIndex(c->R0, position, c->B0, c->A0);
-   Top(q->v, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, v, w);
+   const int IDX1 = GetIndex(c->P1.R, position, c->P1.B, c->P1.A);
+   const int IDX2 = GetIndex(c->P1.R, position, c->P1.B, c->P0.A);
+   const int IDX3 = GetIndex(c->P1.R, position, c->P0.B, c->P1.A);
+   const int IDX4 = GetIndex(c->P1.R, position, c->P0.B, c->P0.A);
+   const int IDX5 = GetIndex(c->P0.R, position, c->P1.B, c->P1.A);
+   const int IDX6 = GetIndex(c->P0.R, position, c->P1.B, c->P0.A);
+   const int IDX7 = GetIndex(c->P0.R, position, c->P0.B, c->P1.A);
+   const int IDX8 = GetIndex(c->P0.R, position, c->P0.B, c->P0.A);
+   Top(m, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, v, w);
 }
-__forceinline static void TopB(const Box* c, const int position, const Quantizer* q, V4i* v, int* w)
+__forceinline static void TopB(const Box* c, const int position, const Moment* m, V4i* v, int* w)
 {
-   const int IDX1 = GetIndex(c->R1, c->G1, position, c->A1);
-   const int IDX2 = GetIndex(c->R1, c->G1, position, c->A0);
-   const int IDX3 = GetIndex(c->R1, c->G0, position, c->A1);
-   const int IDX4 = GetIndex(c->R1, c->G0, position, c->A0);
-   const int IDX5 = GetIndex(c->R0, c->G1, position, c->A1);
-   const int IDX6 = GetIndex(c->R0, c->G1, position, c->A0);
-   const int IDX7 = GetIndex(c->R0, c->G0, position, c->A1);
-   const int IDX8 = GetIndex(c->R0, c->G0, position, c->A0);
-   Top(q->v, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, v, w);
+   const int IDX1 = GetIndex(c->P1.R, c->P1.G, position, c->P1.A);
+   const int IDX2 = GetIndex(c->P1.R, c->P1.G, position, c->P0.A);
+   const int IDX3 = GetIndex(c->P1.R, c->P0.G, position, c->P1.A);
+   const int IDX4 = GetIndex(c->P1.R, c->P0.G, position, c->P0.A);
+   const int IDX5 = GetIndex(c->P0.R, c->P1.G, position, c->P1.A);
+   const int IDX6 = GetIndex(c->P0.R, c->P1.G, position, c->P0.A);
+   const int IDX7 = GetIndex(c->P0.R, c->P0.G, position, c->P1.A);
+   const int IDX8 = GetIndex(c->P0.R, c->P0.G, position, c->P0.A);
+   Top(m, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, v, w);
 }
-__forceinline static void TopA(const Box* c, const int position, const Quantizer* q, V4i* v, int* w)
+__forceinline static void TopA(const Box* c, const int position, const Moment* m, V4i* v, int* w)
 {
-   const int IDX1 = GetIndex(c->R1, c->G1, c->B1, position);
-   const int IDX2 = GetIndex(c->R1, c->G1, c->B0, position);
-   const int IDX3 = GetIndex(c->R1, c->G0, c->B1, position);
-   const int IDX4 = GetIndex(c->R1, c->G0, c->B0, position);
-   const int IDX5 = GetIndex(c->R0, c->G1, c->B1, position);
-   const int IDX6 = GetIndex(c->R0, c->G1, c->B0, position);
-   const int IDX7 = GetIndex(c->R0, c->G0, c->B1, position);
-   const int IDX8 = GetIndex(c->R0, c->G0, c->B0, position);
-   Top(q->v, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, v, w);
+   const int IDX1 = GetIndex(c->P1.R, c->P1.G, c->P1.B, position);
+   const int IDX2 = GetIndex(c->P1.R, c->P1.G, c->P0.B, position);
+   const int IDX3 = GetIndex(c->P1.R, c->P0.G, c->P1.B, position);
+   const int IDX4 = GetIndex(c->P1.R, c->P0.G, c->P0.B, position);
+   const int IDX5 = GetIndex(c->P0.R, c->P1.G, c->P1.B, position);
+   const int IDX6 = GetIndex(c->P0.R, c->P1.G, c->P0.B, position);
+   const int IDX7 = GetIndex(c->P0.R, c->P0.G, c->P1.B, position);
+   const int IDX8 = GetIndex(c->P0.R, c->P0.G, c->P0.B, position);
+   Top(m, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, v, w);
 }
 
 __forceinline static void Maximize(Quantizer* quantizer, Box* cube, V4i* cut, V4f* whole, float wholeW, V4f* ma)
@@ -155,13 +155,13 @@ __forceinline static void Maximize(Quantizer* quantizer, Box* cube, V4i* cut, V4
    V4i base; int baseW;
    
    // R
-   BottomR(cube, quantizer, &base, &baseW);
+   BottomR(cube, quantizer->v, &base, &baseW);
    max = 0.0;
    cut->R = -1;
-   for (int i = cube->R0 + 1; i < cube->R1; i++)
+   for (int i = cube->P0.R + 1; i < cube->P1.R; i++)
    {
       V4i top; int topW; V4f half; float halfW; __m128 temp; float tf;
-      TopR(cube, i, quantizer, &top, &topW);
+      TopR(cube, i, quantizer->v, &top, &topW);
       half.SSE = _mm_cvtepi32_ps(_mm_add_epi32(base.SSE, top.SSE));
       halfW = (float)(baseW + topW);
       if (halfW == 0) continue;
@@ -180,13 +180,13 @@ __forceinline static void Maximize(Quantizer* quantizer, Box* cube, V4i* cut, V4
    ma->R = max;
 
    // G
-   BottomG(cube, quantizer, &base, &baseW);
+   BottomG(cube, quantizer->v, &base, &baseW);
    max = 0.0;
    cut->G = -1;
-   for (int i = cube->G0 + 1; i < cube->G1; i++)
+   for (int i = cube->P0.G + 1; i < cube->P1.G; i++)
    {
       V4i top; int topW; V4f half; float halfW; __m128 temp; float tf;
-      TopG(cube, i, quantizer, &top, &topW);
+      TopG(cube, i, quantizer->v, &top, &topW);
       half.SSE = _mm_cvtepi32_ps(_mm_add_epi32(base.SSE, top.SSE));
       halfW = (float)(baseW + topW);
       if (halfW == 0) continue;
@@ -205,13 +205,13 @@ __forceinline static void Maximize(Quantizer* quantizer, Box* cube, V4i* cut, V4
    ma->G = max;
 
    // B
-   BottomB(cube, quantizer, &base, &baseW);
+   BottomB(cube, quantizer->v, &base, &baseW);
    max = 0.0;
    cut->B = -1;
-   for (int i = cube->B0 + 1; i < cube->B1; i++)
+   for (int i = cube->P0.B + 1; i < cube->P1.B; i++)
    {
       V4i top; int topW; V4f half; float halfW; __m128 temp; float tf;
-      TopB(cube, i, quantizer, &top, &topW);
+      TopB(cube, i, quantizer->v, &top, &topW);
       half.SSE = _mm_cvtepi32_ps(_mm_add_epi32(base.SSE, top.SSE));
       halfW = (float)(baseW + topW);
       if (halfW == 0) continue;
@@ -230,13 +230,13 @@ __forceinline static void Maximize(Quantizer* quantizer, Box* cube, V4i* cut, V4
    ma->B = max;
 
    // A
-   BottomA(cube, quantizer, &base, &baseW);
+   BottomA(cube, quantizer->v, &base, &baseW);
    max = 0.0;
    cut->A = -1;
-   for (int i = cube->A0 + 1; i < cube->A1; i++)
+   for (int i = cube->P0.A + 1; i < cube->P1.A; i++)
    {
       V4i top; int topW; V4f half; float halfW; __m128 temp; float tf;
-      TopA(cube, i, quantizer, &top, &topW);
+      TopA(cube, i, quantizer->v, &top, &topW);
       half.SSE = _mm_cvtepi32_ps(_mm_add_epi32(base.SSE, top.SSE));
       halfW = (float)(baseW + topW);
       if (halfW == 0) continue;
@@ -288,22 +288,22 @@ __forceinline static void _Volume(const Moment* m,
 
 __forceinline static void Volume(const Box* cube, const Moment* m, V4f* col, float* w)
 {
-   const int IDX1 = GetIndex(cube->R1, cube->G1, cube->B1, cube->A1);
-   const int IDX2 = GetIndex(cube->R1, cube->G1, cube->B1, cube->A0);
-   const int IDX3 = GetIndex(cube->R1, cube->G1, cube->B0, cube->A1);
-   const int IDX4 = GetIndex(cube->R1, cube->G1, cube->B0, cube->A0);
-   const int IDX5 = GetIndex(cube->R1, cube->G0, cube->B1, cube->A1);
-   const int IDX6 = GetIndex(cube->R1, cube->G0, cube->B1, cube->A0);
-   const int IDX7 = GetIndex(cube->R1, cube->G0, cube->B0, cube->A1);
-   const int IDX8 = GetIndex(cube->R1, cube->G0, cube->B0, cube->A0);
-   const int IDX9 = GetIndex(cube->R0, cube->G1, cube->B1, cube->A1);
-   const int IDX10 = GetIndex(cube->R0, cube->G1, cube->B1, cube->A0);
-   const int IDX11 = GetIndex(cube->R0, cube->G1, cube->B0, cube->A1);
-   const int IDX12 = GetIndex(cube->R0, cube->G1, cube->B0, cube->A0);
-   const int IDX13 = GetIndex(cube->R0, cube->G0, cube->B1, cube->A1);
-   const int IDX14 = GetIndex(cube->R0, cube->G0, cube->B1, cube->A0);
-   const int IDX15 = GetIndex(cube->R0, cube->G0, cube->B0, cube->A1);
-   const int IDX16 = GetIndex(cube->R0, cube->G0, cube->B0, cube->A0);
+   const int IDX1 = GetIndex(cube->P1.R, cube->P1.G, cube->P1.B, cube->P1.A);
+   const int IDX2 = GetIndex(cube->P1.R, cube->P1.G, cube->P1.B, cube->P0.A);
+   const int IDX3 = GetIndex(cube->P1.R, cube->P1.G, cube->P0.B, cube->P1.A);
+   const int IDX4 = GetIndex(cube->P1.R, cube->P1.G, cube->P0.B, cube->P0.A);
+   const int IDX5 = GetIndex(cube->P1.R, cube->P0.G, cube->P1.B, cube->P1.A);
+   const int IDX6 = GetIndex(cube->P1.R, cube->P0.G, cube->P1.B, cube->P0.A);
+   const int IDX7 = GetIndex(cube->P1.R, cube->P0.G, cube->P0.B, cube->P1.A);
+   const int IDX8 = GetIndex(cube->P1.R, cube->P0.G, cube->P0.B, cube->P0.A);
+   const int IDX9 = GetIndex(cube->P0.R, cube->P1.G, cube->P1.B, cube->P1.A);
+   const int IDX10 = GetIndex(cube->P0.R, cube->P1.G, cube->P1.B, cube->P0.A);
+   const int IDX11 = GetIndex(cube->P0.R, cube->P1.G, cube->P0.B, cube->P1.A);
+   const int IDX12 = GetIndex(cube->P0.R, cube->P1.G, cube->P0.B, cube->P0.A);
+   const int IDX13 = GetIndex(cube->P0.R, cube->P0.G, cube->P1.B, cube->P1.A);
+   const int IDX14 = GetIndex(cube->P0.R, cube->P0.G, cube->P1.B, cube->P0.A);
+   const int IDX15 = GetIndex(cube->P0.R, cube->P0.G, cube->P0.B, cube->P1.A);
+   const int IDX16 = GetIndex(cube->P0.R, cube->P0.G, cube->P0.B, cube->P0.A);
 
    _Volume(m, 
       IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8,
@@ -313,22 +313,22 @@ __forceinline static void Volume(const Box* cube, const Moment* m, V4f* col, flo
 
 __forceinline static float Variance(const Moment* m, const Box* c)
 {
-   const int IDX1 = GetIndex(c->R1, c->G1, c->B1, c->A1);
-   const int IDX2 = GetIndex(c->R1, c->G1, c->B1, c->A0);
-   const int IDX3 = GetIndex(c->R1, c->G1, c->B0, c->A1);
-   const int IDX4 = GetIndex(c->R1, c->G1, c->B0, c->A0);
-   const int IDX5 = GetIndex(c->R1, c->G0, c->B1, c->A1);
-   const int IDX6 = GetIndex(c->R1, c->G0, c->B1, c->A0);
-   const int IDX7 = GetIndex(c->R1, c->G0, c->B0, c->A1);
-   const int IDX8 = GetIndex(c->R1, c->G0, c->B0, c->A0);
-   const int IDX9 = GetIndex(c->R0, c->G1, c->B1, c->A1);
-   const int IDX10 = GetIndex(c->R0, c->G1, c->B1, c->A0);
-   const int IDX11 = GetIndex(c->R0, c->G1, c->B0, c->A1);
-   const int IDX12 = GetIndex(c->R0, c->G1, c->B0, c->A0);
-   const int IDX13 = GetIndex(c->R0, c->G0, c->B1, c->A1);
-   const int IDX14 = GetIndex(c->R0, c->G0, c->B1, c->A0);
-   const int IDX15 = GetIndex(c->R0, c->G0, c->B0, c->A1);
-   const int IDX16 = GetIndex(c->R0, c->G0, c->B0, c->A0);
+   const int IDX1 = GetIndex(c->P1.R, c->P1.G, c->P1.B, c->P1.A);
+   const int IDX2 = GetIndex(c->P1.R, c->P1.G, c->P1.B, c->P0.A);
+   const int IDX3 = GetIndex(c->P1.R, c->P1.G, c->P0.B, c->P1.A);
+   const int IDX4 = GetIndex(c->P1.R, c->P1.G, c->P0.B, c->P0.A);
+   const int IDX5 = GetIndex(c->P1.R, c->P0.G, c->P1.B, c->P1.A);
+   const int IDX6 = GetIndex(c->P1.R, c->P0.G, c->P1.B, c->P0.A);
+   const int IDX7 = GetIndex(c->P1.R, c->P0.G, c->P0.B, c->P1.A);
+   const int IDX8 = GetIndex(c->P1.R, c->P0.G, c->P0.B, c->P0.A);
+   const int IDX9 = GetIndex(c->P0.R, c->P1.G, c->P1.B, c->P1.A);
+   const int IDX10 = GetIndex(c->P0.R, c->P1.G, c->P1.B, c->P0.A);
+   const int IDX11 = GetIndex(c->P0.R, c->P1.G, c->P0.B, c->P1.A);
+   const int IDX12 = GetIndex(c->P0.R, c->P1.G, c->P0.B, c->P0.A);
+   const int IDX13 = GetIndex(c->P0.R, c->P0.G, c->P1.B, c->P1.A);
+   const int IDX14 = GetIndex(c->P0.R, c->P0.G, c->P1.B, c->P0.A);
+   const int IDX15 = GetIndex(c->P0.R, c->P0.G, c->P0.B, c->P1.A);
+   const int IDX16 = GetIndex(c->P0.R, c->P0.G, c->P0.B, c->P0.A);
 
    //const Moment* m = quantizer->v;
 
@@ -359,10 +359,10 @@ __forceinline static int Cut(Quantizer* quantizer, Box* set1, Box* set2)
    V4f max; V4i cut;
    Maximize(quantizer, set1, &cut, &whole, wholeW, &max);
 
-   set2->R1 = set1->R1;
-   set2->G1 = set1->G1;
-   set2->B1 = set1->B1;
-   set2->A1 = set1->A1;
+   set2->P1.R = set1->P1.R;
+   set2->P1.G = set1->P1.G;
+   set2->P1.B = set1->P1.B;
+   set2->P1.A = set1->P1.A;
 
    // RED
    if ((max.R >= max.G) && (max.R >= max.B) && (max.R >= max.A))
@@ -370,51 +370,51 @@ __forceinline static int Cut(Quantizer* quantizer, Box* set1, Box* set2)
       if (cut.R < 0)
          return 0;
 
-      set2->R0 = set1->R1 = cut.R;
-      set2->G0 = set1->G0;
-      set2->B0 = set1->B0;
-      set2->A0 = set1->A0;
+      set2->P0.R = set1->P1.R = cut.R;
+      set2->P0.G = set1->P0.G;
+      set2->P0.B = set1->P0.B;
+      set2->P0.A = set1->P0.A;
    }
 
    // GREEN
    else if ((max.G >= max.R) && (max.G >= max.B) && (max.G >= max.A))
    {
-      set2->G0 = set1->G1 = cut.G;
-      set2->R0 = set1->R0;
-      set2->B0 = set1->B0;
-      set2->A0 = set1->A0;
+      set2->P0.G = set1->P1.G = cut.G;
+      set2->P0.R = set1->P0.R;
+      set2->P0.B = set1->P0.B;
+      set2->P0.A = set1->P0.A;
    }
 
    // BLUE
    else if ((max.B >= max.R) && (max.B >= max.G) && (max.B >= max.A))
    {
-      set2->B0 = set1->B1 = cut.B;
-      set2->R0 = set1->R0;
-      set2->G0 = set1->G0;
-      set2->A0 = set1->A0;
+      set2->P0.B = set1->P1.B = cut.B;
+      set2->P0.R = set1->P0.R;
+      set2->P0.G = set1->P0.G;
+      set2->P0.A = set1->P0.A;
    }
 
    // ALPHA
    else
    {
-      set2->A0 = set1->A1 = cut.A;
-      set2->R0 = set1->R0;
-      set2->G0 = set1->G0;
-      set2->B0 = set1->B0;
+      set2->P0.A = set1->P1.A = cut.A;
+      set2->P0.R = set1->P0.R;
+      set2->P0.G = set1->P0.G;
+      set2->P0.B = set1->P0.B;
    }
 
-   set1->Volume = (set1->R1 - set1->R0) * (set1->G1 - set1->G0) * (set1->B1 - set1->B0) * (set1->A1 - set1->A0);
-   set2->Volume = (set2->R1 - set2->R0) * (set2->G1 - set2->G0) * (set2->B1 - set2->B0) * (set2->A1 - set2->A0);
+   set1->Volume = (set1->P1.R - set1->P0.R) * (set1->P1.G - set1->P0.G) * (set1->P1.B - set1->P0.B) * (set1->P1.A - set1->P0.A);
+   set2->Volume = (set2->P1.R - set2->P0.R) * (set2->P1.G - set2->P0.G) * (set2->P1.B - set2->P0.B) * (set2->P1.A - set2->P0.A);
 
    return 1;
 }
 
 __forceinline static void Mark(Quantizer* quantizer, Box* cube, char label)
 {
-   for (int r = cube->R0 + 1; r <= cube->R1; r++)
-      for (int g = cube->G0 + 1; g <= cube->G1; g++)
-         for (int b = cube->B0 + 1; b <= cube->B1; b++)
-            for (int a = cube->A0 + 1; a <= cube->A1; a++)
+   for (int r = cube->P0.R + 1; r <= cube->P1.R; r++)
+      for (int g = cube->P0.G + 1; g <= cube->P1.G; g++)
+         for (int b = cube->P0.B + 1; b <= cube->P1.B; b++)
+            for (int a = cube->P0.A + 1; a <= cube->P1.A; a++)
                quantizer->tag[GetIndex(r, g, b, a)] = label;
 }
 
@@ -494,9 +494,9 @@ static void Get3DMoments(Quantizer* quantizer)
 
 static void BuildCube(Quantizer* quantizer, int* colorCount)
 {
-   quantizer->cube[0].R0 = quantizer->cube[0].G0 = quantizer->cube[0].B0 = quantizer->cube[0].A0 = 0;
-   quantizer->cube[0].R1 = quantizer->cube[0].G1 = quantizer->cube[0].B1 = INDEXCOUNT - 1;
-   quantizer->cube[0].A1 = INDEXALPHACOUNT - 1;
+   quantizer->cube[0].P0.R = quantizer->cube[0].P0.G = quantizer->cube[0].P0.B = quantizer->cube[0].P0.A = 0;
+   quantizer->cube[0].P1.R = quantizer->cube[0].P1.G = quantizer->cube[0].P1.B = INDEXCOUNT - 1;
+   quantizer->cube[0].P1.A = INDEXALPHACOUNT - 1;
 
    int next = 0;
 
