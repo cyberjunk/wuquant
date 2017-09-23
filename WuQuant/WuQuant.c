@@ -429,7 +429,6 @@ static void Build3DHistogram(Moment* m, unsigned int* image, int width, int heig
 static void Get3DMoments(Quantizer* quantizer)
 {
    V4i l;
-
    for (int r = 1; r < INDEXCOUNT; r++)
    {
       memset(quantizer->volume, 0, sizeof(quantizer->volume));
@@ -474,45 +473,39 @@ static void Get3DMoments(Quantizer* quantizer)
    }
 }
 
-static void BuildCube(Quantizer* quantizer, int* colorCount)
+static unsigned int BuildCube(Quantizer* q)
 {
-   quantizer->cube[0].P0.R = quantizer->cube[0].P0.G = quantizer->cube[0].P0.B = quantizer->cube[0].P0.A = 0;
-   quantizer->cube[0].P1.R = quantizer->cube[0].P1.G = quantizer->cube[0].P1.B = INDEXCOUNT - 1;
-   quantizer->cube[0].P1.A = INDEXALPHACOUNT - 1;
-
-   int next = 0;
-
-   for (int i = 1; i < *colorCount; i++)
+   q->cube[0].P0.SSE = _mm_setzero_si128();
+   q->cube[0].P1.SSE = _mm_set_epi32(INDEXALPHACOUNT - 1, INDEXCOUNT - 1, INDEXCOUNT - 1, INDEXCOUNT - 1);
+   unsigned int next = 0;
+   for (unsigned int i = 1; i < MAXCOLORS; i++)
    {
-      if (Cut(quantizer, &quantizer->cube[next], &quantizer->cube[i]))
+      Box* cubeNext = &q->cube[next];
+      Box* cubeI    = &q->cube[i];
+      if (Cut(q, cubeNext, cubeI))
       {
-         quantizer->cube[next].vv = quantizer->cube[next].Volume > 1 ? Variance(quantizer->v, &quantizer->cube[next]) : 0.0f;
-         quantizer->cube[i].vv = quantizer->cube[i].Volume > 1 ? Variance(quantizer->v, &quantizer->cube[i]) : 0.0f;
+         cubeNext->vv = cubeNext->Volume > 1 ? Variance(q->v, cubeNext) : 0.0f;
+         cubeI->vv    = cubeI->Volume    > 1 ? Variance(q->v, cubeI)    : 0.0f;
       }
       else
       {
-         quantizer->cube[next].vv = 0.0f;
+         cubeNext->vv = 0.0f;
          i--;
       }
-
       next = 0;
-
-      float temp = quantizer->cube[0].vv;
-      for (int k = 1; k <= i; k++)
+      float temp = q->cube[0].vv;
+      for (unsigned int k = 1; k <= i; k++)
       {
-         if (quantizer->cube[k].vv > temp)
+         if (q->cube[k].vv > temp)
          {
-            temp = quantizer->cube[k].vv;
+            temp = q->cube[k].vv;
             next = k;
          }
       }
-
-      if (temp <= 0.0)
-      {
-         *colorCount = i + 1;
-         break;
-      }
+      if (temp <= 0.0f)
+         return i + 1;
    }
+   return MAXCOLORS;
 }
 
 static void GenerateResult(Quantizer* quantizer, unsigned int* image, unsigned int* palette, int colorCount, int width, int height, char* destPixels, int padMultiple4)
@@ -612,7 +605,11 @@ int Quantize(
    Clear(quantizer);
    Build3DHistogram(quantizer->v, image, width, height);
    Get3DMoments(quantizer);
-   BuildCube(quantizer, colorCount);
+
+   // build cube
+   *colorCount = (int)BuildCube(quantizer);
+
+   // generate result
    GenerateResult(quantizer, image, palette, *colorCount, width, height, destPixels, padMultiple4);
 
    return 1;
