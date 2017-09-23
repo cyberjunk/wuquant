@@ -396,13 +396,13 @@ __forceinline static int Cut(const Quantizer* quantizer, Box* set1, Box* set2)
    return 1;
 }
 
-__forceinline static void Mark(Quantizer* quantizer, Box* cube, char label)
+__forceinline static void Mark(char* tags, const Box* c, const char label)
 {
-   for (int r = cube->P0.R + 1; r <= cube->P1.R; r++)
-      for (int g = cube->P0.G + 1; g <= cube->P1.G; g++)
-         for (int b = cube->P0.B + 1; b <= cube->P1.B; b++)
-            for (int a = cube->P0.A + 1; a <= cube->P1.A; a++)
-               quantizer->tag[GetIndex(r, g, b, a)] = label;
+   for (int r = c->P0.R + 1; r <= c->P1.R; r++)
+      for (int g = c->P0.G + 1; g <= c->P1.G; g++)
+         for (int b = c->P0.B + 1; b <= c->P1.B; b++)
+            for (int a = c->P0.A + 1; a <= c->P1.A; a++)
+               tags[GetIndex(r, g, b, a)] = label;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -513,7 +513,15 @@ static unsigned int BuildCube(Quantizer* q)
    return MAXCOLORS;
 }
 
-static void GenerateResult(Quantizer* quantizer, unsigned int* image, unsigned int* palette, unsigned int colorCount, unsigned int width, unsigned int height, char* destPixels, int padMultiple4)
+static void GenerateResult(
+   Quantizer*    quantizer, 
+   unsigned int* image, 
+   unsigned int* palette, 
+   unsigned int  colorCount, 
+   unsigned int  width, 
+   unsigned int  height, 
+   char*         destPixels, 
+   int           padMultiple4)
 {
    V4f d; float weight;
    V4i di; V4i in;
@@ -525,7 +533,7 @@ static void GenerateResult(Quantizer* quantizer, unsigned int* image, unsigned i
    // create palette
    for (unsigned int k = 0; k < colorCount; k++)
    {
-      Mark(quantizer, &quantizer->cube[k], (char)k);
+      Mark(quantizer->tag, &quantizer->cube[k], (char)k);
       Volume(&quantizer->cube[k], quantizer->v, &d, &weight);
 
       if (weight > 0.01 || weight < -0.01)
