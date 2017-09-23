@@ -253,6 +253,37 @@ __forceinline static float MaximizeA(Quantizer* quantizer, Box* cube, int first,
    return max;
 }
 
+__forceinline static void _Volume(const Moment* m,
+   const int IDX1, const int IDX2, const int IDX3, const int IDX4,
+   const int IDX5, const int IDX6, const int IDX7, const int IDX8,
+   const int IDX9, const int IDX10, const int IDX11, const int IDX12,
+   const int IDX13, const int IDX14, const int IDX15, const int IDX16,
+   V4f* v, float* w)
+{
+   __m128i s01 = _mm_sub_epi32(m[IDX1].P.SSE, m[IDX2].P.SSE);
+   __m128i s02 = _mm_sub_epi32(s01, m[IDX3].P.SSE);
+   __m128i s03 = _mm_add_epi32(s02, m[IDX4].P.SSE);
+   __m128i s04 = _mm_sub_epi32(s03, m[IDX5].P.SSE);
+   __m128i s05 = _mm_add_epi32(s04, m[IDX6].P.SSE);
+   __m128i s06 = _mm_add_epi32(s05, m[IDX7].P.SSE);
+   __m128i s07 = _mm_sub_epi32(s06, m[IDX8].P.SSE);
+   __m128i s08 = _mm_sub_epi32(s07, m[IDX9].P.SSE);
+   __m128i s09 = _mm_add_epi32(s08, m[IDX10].P.SSE);
+   __m128i s10 = _mm_add_epi32(s09, m[IDX11].P.SSE);
+   __m128i s11 = _mm_sub_epi32(s10, m[IDX12].P.SSE);
+   __m128i s12 = _mm_add_epi32(s11, m[IDX13].P.SSE);
+   __m128i s13 = _mm_sub_epi32(s12, m[IDX14].P.SSE);
+   __m128i s14 = _mm_sub_epi32(s13, m[IDX15].P.SSE);
+   __m128i s15 = _mm_add_epi32(s14, m[IDX16].P.SSE);
+   v->SSE = _mm_cvtepi32_ps(s15);
+
+   *w = (float)(
+      m[IDX1].V  - m[IDX2].V  - m[IDX3].V  + m[IDX4].V  -
+      m[IDX5].V  + m[IDX6].V  + m[IDX7].V  - m[IDX8].V  -
+      m[IDX9].V  + m[IDX10].V + m[IDX11].V - m[IDX12].V +
+      m[IDX13].V - m[IDX14].V - m[IDX15].V + m[IDX16].V);
+}
+
 __forceinline static void Volume(const Box* cube, const Quantizer* quantizer, V4f* col, float* w)
 {
    const int IDX1 = GetIndex(cube->R1, cube->G1, cube->B1, cube->A1);
@@ -272,37 +303,14 @@ __forceinline static void Volume(const Box* cube, const Quantizer* quantizer, V4
    const int IDX15 = GetIndex(cube->R0, cube->G0, cube->B0, cube->A1);
    const int IDX16 = GetIndex(cube->R0, cube->G0, cube->B0, cube->A0);
 
-   const Moment* v = quantizer->v;
-
-   __m128i s01 = _mm_sub_epi32(v[IDX1].P.SSE, v[IDX2].P.SSE);
-   __m128i s02 = _mm_sub_epi32(s01, v[IDX3].P.SSE);
-   __m128i s03 = _mm_add_epi32(s02, v[IDX4].P.SSE);
-   __m128i s04 = _mm_sub_epi32(s03, v[IDX5].P.SSE);
-   __m128i s05 = _mm_add_epi32(s04, v[IDX6].P.SSE);
-   __m128i s06 = _mm_add_epi32(s05, v[IDX7].P.SSE);
-   __m128i s07 = _mm_sub_epi32(s06, v[IDX8].P.SSE);
-   __m128i s08 = _mm_sub_epi32(s07, v[IDX9].P.SSE);
-   __m128i s09 = _mm_add_epi32(s08, v[IDX10].P.SSE);
-   __m128i s10 = _mm_add_epi32(s09, v[IDX11].P.SSE);
-   __m128i s11 = _mm_sub_epi32(s10, v[IDX12].P.SSE);
-   __m128i s12 = _mm_add_epi32(s11, v[IDX13].P.SSE);
-   __m128i s13 = _mm_sub_epi32(s12, v[IDX14].P.SSE);
-   __m128i s14 = _mm_sub_epi32(s13, v[IDX15].P.SSE);
-   __m128i s15 = _mm_add_epi32(s14, v[IDX16].P.SSE);
-   col->SSE = _mm_cvtepi32_ps(s15);
-
-   *w = (float)(
-      v[IDX1].V  - v[IDX2].V  - v[IDX3].V  + v[IDX4].V  -
-      v[IDX5].V  + v[IDX6].V  + v[IDX7].V  - v[IDX8].V  -
-      v[IDX9].V  + v[IDX10].V + v[IDX11].V - v[IDX12].V +
-      v[IDX13].V - v[IDX14].V - v[IDX15].V + v[IDX16].V);
+   _Volume(quantizer->v, 
+      IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8,
+      IDX9, IDX10, IDX11, IDX12, IDX13, IDX14, IDX15, IDX16,
+      col, w);
 }
 
 __forceinline static float Variance(const Quantizer* quantizer, const Box* cube)
 {
-   V4f d; float vol;
-   Volume(cube, quantizer, &d, &vol);
-
    const int IDX1 = GetIndex(cube->R1, cube->G1, cube->B1, cube->A1);
    const int IDX2 = GetIndex(cube->R1, cube->G1, cube->B1, cube->A0);
    const int IDX3 = GetIndex(cube->R1, cube->G1, cube->B0, cube->A1);
@@ -320,13 +328,21 @@ __forceinline static float Variance(const Quantizer* quantizer, const Box* cube)
    const int IDX15 = GetIndex(cube->R0, cube->G0, cube->B0, cube->A1);
    const int IDX16 = GetIndex(cube->R0, cube->G0, cube->B0, cube->A0);
 
-   const Moment* v = quantizer->v;
+   const Moment* m = quantizer->v;
 
    const float xx =
-      + v[IDX1].V2  - v[IDX2].V2  - v[IDX3].V2  + v[IDX4].V2
-      - v[IDX5].V2  + v[IDX6].V2  + v[IDX7].V2  - v[IDX8].V2
-      - v[IDX9].V2  + v[IDX10].V2 + v[IDX11].V2 - v[IDX12].V2
-      + v[IDX13].V2 - v[IDX14].V2 - v[IDX15].V2 + v[IDX16].V2;
+      + m[IDX1].V2  - m[IDX2].V2  - m[IDX3].V2  + m[IDX4].V2
+      - m[IDX5].V2  + m[IDX6].V2  + m[IDX7].V2  - m[IDX8].V2
+      - m[IDX9].V2  + m[IDX10].V2 + m[IDX11].V2 - m[IDX12].V2
+      + m[IDX13].V2 - m[IDX14].V2 - m[IDX15].V2 + m[IDX16].V2;
+
+   V4f d; 
+   float vol;
+
+   _Volume(m,
+      IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8,
+      IDX9, IDX10, IDX11, IDX12, IDX13, IDX14, IDX15, IDX16,
+      &d, &vol);
 
    const __m128 sub = _mm_div_ss(_mm_dp_ps(d.SSE, d.SSE, 0xF1), _mm_set_ss(vol));
 
