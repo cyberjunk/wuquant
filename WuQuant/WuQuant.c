@@ -149,13 +149,16 @@ __forceinline static void TopA(const Box* c, const int position, const Quantizer
    Top(q->v, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, v, w);
 }
 
-__forceinline static float MaximizeR(Quantizer* quantizer, Box* cube, int first, int last, int* cut, V4f* whole, float wholeW)
+__forceinline static void Maximize(Quantizer* quantizer, Box* cube, V4i* cut, V4f* whole, float wholeW, V4f* ma)
 {
+   float max;
    V4i base; int baseW;
+   
+   // R
    BottomR(cube, quantizer, &base, &baseW);
-   float max = 0.0;
-   *cut = -1;
-   for (int i = first; i < last; i++)
+   max = 0.0;
+   cut->R = -1;
+   for (int i = cube->R0 + 1; i < cube->R1; i++)
    {
       V4i top; int topW; V4f half; float halfW; __m128 temp; float tf;
       TopR(cube, i, quantizer, &top, &topW);
@@ -171,18 +174,16 @@ __forceinline static float MaximizeR(Quantizer* quantizer, Box* cube, int first,
       if (tf > max)
       {
          max = tf;
-         *cut = i;
+         cut->R = i;
       }
    }
-   return max;
-}
-__forceinline static float MaximizeG(Quantizer* quantizer, Box* cube, int first, int last, int* cut, V4f* whole, float wholeW)
-{
-   V4i base; int baseW;
+   ma->R = max;
+
+   // G
    BottomG(cube, quantizer, &base, &baseW);
-   float max = 0.0;
-   *cut = -1;
-   for (int i = first; i < last; i++)
+   max = 0.0;
+   cut->G = -1;
+   for (int i = cube->G0 + 1; i < cube->G1; i++)
    {
       V4i top; int topW; V4f half; float halfW; __m128 temp; float tf;
       TopG(cube, i, quantizer, &top, &topW);
@@ -198,18 +199,16 @@ __forceinline static float MaximizeG(Quantizer* quantizer, Box* cube, int first,
       if (tf > max)
       {
          max = tf;
-         *cut = i;
+         cut->G = i;
       }
    }
-   return max;
-}
-__forceinline static float MaximizeB(Quantizer* quantizer, Box* cube, int first, int last, int* cut, V4f* whole, float wholeW)
-{
-   V4i base; int baseW;
+   ma->G = max;
+
+   // B
    BottomB(cube, quantizer, &base, &baseW);
-   float max = 0.0;
-   *cut = -1;
-   for (int i = first; i < last; i++)
+   max = 0.0;
+   cut->B = -1;
+   for (int i = cube->B0 + 1; i < cube->B1; i++)
    {
       V4i top; int topW; V4f half; float halfW; __m128 temp; float tf;
       TopB(cube, i, quantizer, &top, &topW);
@@ -225,18 +224,16 @@ __forceinline static float MaximizeB(Quantizer* quantizer, Box* cube, int first,
       if (tf > max)
       {
          max = tf;
-         *cut = i;
+         cut->B = i;
       }
    }
-   return max;
-}
-__forceinline static float MaximizeA(Quantizer* quantizer, Box* cube, int first, int last, int* cut, V4f* whole, float wholeW)
-{
-   V4i base; int baseW; 
+   ma->B = max;
+
+   // A
    BottomA(cube, quantizer, &base, &baseW);
-   float max = 0.0;
-   *cut = -1;
-   for (int i = first; i < last; i++)
+   max = 0.0;
+   cut->A = -1;
+   for (int i = cube->A0 + 1; i < cube->A1; i++)
    {
       V4i top; int topW; V4f half; float halfW; __m128 temp; float tf;
       TopA(cube, i, quantizer, &top, &topW);
@@ -252,10 +249,10 @@ __forceinline static float MaximizeA(Quantizer* quantizer, Box* cube, int first,
       if (tf > max)
       {
          max = tf;
-         *cut = i;
+         cut->A = i;
       }
    }
-   return max;
+   ma->A = max;
 }
 
 __forceinline static void _Volume(const Moment* m,
@@ -359,15 +356,8 @@ __forceinline static int Cut(Quantizer* quantizer, Box* set1, Box* set2)
    V4f whole; float wholeW;
    Volume(set1, quantizer->v, &whole, &wholeW);
 
-   int cutr;
-   int cutg;
-   int cutb;
-   int cuta;
-
-   float maxr = MaximizeR(quantizer, set1, set1->R0 + 1, set1->R1, &cutr, &whole, wholeW);
-   float maxg = MaximizeG(quantizer, set1, set1->G0 + 1, set1->G1, &cutg, &whole, wholeW);
-   float maxb = MaximizeB(quantizer, set1, set1->B0 + 1, set1->B1, &cutb, &whole, wholeW);
-   float maxa = MaximizeA(quantizer, set1, set1->A0 + 1, set1->A1, &cuta, &whole, wholeW);
+   V4f max; V4i cut;
+   Maximize(quantizer, set1, &cut, &whole, wholeW, &max);
 
    set2->R1 = set1->R1;
    set2->G1 = set1->G1;
@@ -375,30 +365,30 @@ __forceinline static int Cut(Quantizer* quantizer, Box* set1, Box* set2)
    set2->A1 = set1->A1;
 
    // RED
-   if ((maxr >= maxg) && (maxr >= maxb) && (maxr >= maxa))
+   if ((max.R >= max.G) && (max.R >= max.B) && (max.R >= max.A))
    {
-      if (cutr < 0)
+      if (cut.R < 0)
          return 0;
 
-      set2->R0 = set1->R1 = cutr;
+      set2->R0 = set1->R1 = cut.R;
       set2->G0 = set1->G0;
       set2->B0 = set1->B0;
       set2->A0 = set1->A0;
    }
 
    // GREEN
-   else if ((maxg >= maxr) && (maxg >= maxb) && (maxg >= maxa))
+   else if ((max.G >= max.R) && (max.G >= max.B) && (max.G >= max.A))
    {
-      set2->G0 = set1->G1 = cutg;
+      set2->G0 = set1->G1 = cut.G;
       set2->R0 = set1->R0;
       set2->B0 = set1->B0;
       set2->A0 = set1->A0;
    }
 
    // BLUE
-   else if ((maxb >= maxr) && (maxb >= maxg) && (maxb >= maxa))
+   else if ((max.B >= max.R) && (max.B >= max.G) && (max.B >= max.A))
    {
-      set2->B0 = set1->B1 = cutb;
+      set2->B0 = set1->B1 = cut.B;
       set2->R0 = set1->R0;
       set2->G0 = set1->G0;
       set2->A0 = set1->A0;
@@ -407,7 +397,7 @@ __forceinline static int Cut(Quantizer* quantizer, Box* set1, Box* set2)
    // ALPHA
    else
    {
-      set2->A0 = set1->A1 = cuta;
+      set2->A0 = set1->A1 = cut.A;
       set2->R0 = set1->R0;
       set2->G0 = set1->G0;
       set2->B0 = set1->B0;
