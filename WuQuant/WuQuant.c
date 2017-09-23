@@ -4,6 +4,11 @@
 #include <string.h>
 #include "WuQuant.h"
 
+#define MASK_AND      _mm_set_epi32(0xFF000000, 0x000000FF, 0x0000FF00, 0x00FF0000)
+#define MASK_SHIFT    _mm_set_epi32(24, 0, 8, 16)
+#define MASK_ONE      _mm_set1_epi32(1)
+#define MASK_SHIFTIDX _mm_set_epi32(8 - INDEXALPHABITS, 8 - INDEXBITS, 8 - INDEXBITS, 8 - INDEXBITS)
+
 __forceinline static int GetIndex(const int r, const int g, const int b, const int a)
 {
    return (r << ((INDEXBITS * 2) + INDEXALPHABITS))
@@ -434,30 +439,18 @@ static void Clear(Quantizer* quantizer)
    memset(quantizer->cube, 0, sizeof(quantizer->cube));
 }
 
-static void Build3DHistogram(Quantizer* quantizer, unsigned int* image, int width, int height)
+static void Build3DHistogram(Moment* m, unsigned int* image, int width, int height)
 {
    const unsigned int PIXELS = width * height;
-
-   const __m128i AND = _mm_set_epi32(0xFF000000, 0x000000FF, 0x0000FF00, 0x00FF0000);
-   const __m128i SHIFT = _mm_set_epi32(24, 0, 8, 16);
-   const __m128i ONE = _mm_set1_epi32(1);
-   const __m128i SHIFTIDX = _mm_set_epi32(
-      8 - INDEXALPHABITS,
-      8 - INDEXBITS,
-      8 - INDEXBITS,
-      8 - INDEXBITS);
-
-   V4i p, in;
    for (unsigned int i = 0; i < PIXELS; i++)
    {
-      p.SSE  = _mm_srlv_epi32(_mm_and_si128(_mm_set1_epi32(image[i]), AND), SHIFT);
-      in.SSE = _mm_add_epi32(_mm_srlv_epi32(p.SSE, SHIFTIDX), ONE);
-
+      V4i p, in;
+      p.SSE  = _mm_srlv_epi32(_mm_and_si128(_mm_set1_epi32(image[i]), MASK_AND), MASK_SHIFT);
+      in.SSE = _mm_add_epi32(_mm_srlv_epi32(p.SSE, MASK_SHIFTIDX), MASK_ONE);
       const int IDX = GetIndex(in.R, in.G, in.B, in.A);
-
-      quantizer->v[IDX].P.SSE = _mm_add_epi32(quantizer->v[IDX].P.SSE, p.SSE);
-      quantizer->v[IDX].V++;
-      quantizer->v[IDX].V2 += (p.R * p.R) + (p.G * p.G) + (p.B * p.B) + (p.A * p.A);
+      m[IDX].P.SSE = _mm_add_epi32(m[IDX].P.SSE, p.SSE);
+      m[IDX].V++;
+      m[IDX].V2 += (p.R * p.R) + (p.G * p.G) + (p.B * p.B) + (p.A * p.A);
    }
 }
 
@@ -552,30 +545,23 @@ static void BuildCube(Quantizer* quantizer, int* colorCount)
 
 static void GenerateResult(Quantizer* quantizer, unsigned int* image, unsigned int* palette, int colorCount, int width, int height, char* destPixels, int padMultiple4)
 {
-   // rows must be a multiple of 4, hence padding up to 3 bytes for 8-bit indexed pixels
-   int widthMod4 = width % 4;
-   int widthZeros = widthMod4 != 0 ? 4 - widthMod4 : 0;
+   V4f d; float weight;
+   V4i di; V4i in;
 
+   // rows must be a multiple of 4, hence padding up to 3 bytes for 8-bit indexed pixels
+   const int WIDTHMOD4 = width % 4;
+   const int WIDTHZEROS = WIDTHMOD4 != 0 ? 4 - WIDTHMOD4 : 0;
+   
+   // create palette
    for (int k = 0; k < colorCount; k++)
    {
       Mark(quantizer, &quantizer->cube[k], (char)k);
-
-      V4f d; float weight;
       Volume(&quantizer->cube[k], quantizer->v, &d, &weight);
 
       if (weight > 0.01 || weight < -0.01)
       {
-         d.R /= weight;
-         d.G /= weight;
-         d.B /= weight;
-         d.A /= weight;
-
-         unsigned int a = (unsigned int)d.A;
-         unsigned int r = (unsigned int)d.R;
-         unsigned int g = (unsigned int)d.G;
-         unsigned int b = (unsigned int)d.B;
-
-         palette[k] = (a << 24) | (r << 16) | (g << 8) | b;
+         di.SSE = _mm_cvtps_epi32(_mm_mul_ps(d.SSE, _mm_set1_ps(1.0f / weight)));
+         palette[k] = (di.A << 24) | (di.R << 16) | (di.G << 8) | di.B;
       }
       else
       {
@@ -583,20 +569,17 @@ static void GenerateResult(Quantizer* quantizer, unsigned int* image, unsigned i
       }
    }
 
+   // create pixels
    for (int ri = 0; ri < height; ri++)
    {
       for (int ci = 0; ci < width; ci++)
       {
-         unsigned int pix = image[0];
+         in.SSE = _mm_add_epi32(_mm_srlv_epi32(_mm_srlv_epi32(_mm_and_si128(
+            _mm_set1_epi32(image[0]), MASK_AND), MASK_SHIFT), MASK_SHIFTIDX), MASK_ONE);
+         
+         const int IDX = GetIndex(in.R, in.G, in.B, in.A);
 
-         unsigned int a = ((pix & 0xFF000000) >> 24) >> (8 - INDEXALPHABITS);
-         unsigned int r = ((pix & 0x00FF0000) >> 16) >> (8 - INDEXBITS);
-         unsigned int g = ((pix & 0x0000FF00) >> 8) >> (8 - INDEXBITS);
-         unsigned int b = (pix & 0x000000FF) >> (8 - INDEXBITS);
-
-         int ind = GetIndex((int)r + 1, (int)g + 1, (int)b + 1, (int)a + 1);
-
-         destPixels[0] = quantizer->tag[ind];
+         destPixels[0] = quantizer->tag[IDX];
          destPixels++;
          image++;
       }
@@ -604,7 +587,7 @@ static void GenerateResult(Quantizer* quantizer, unsigned int* image, unsigned i
       // write additional zero bytes if requested
       if (padMultiple4)
       {
-         for (int c = 0; c < widthZeros; c++)
+         for (int c = 0; c < WIDTHZEROS; c++)
          {
             destPixels[0] = 0x00;
             destPixels++;
@@ -655,7 +638,7 @@ int Quantize(
 
    // execute
    Clear(quantizer);
-   Build3DHistogram(quantizer, image, width, height);
+   Build3DHistogram(quantizer->v, image, width, height);
    Get3DMoments(quantizer);
    BuildCube(quantizer, colorCount);
    GenerateResult(quantizer, image, palette, *colorCount, width, height, destPixels, padMultiple4);
