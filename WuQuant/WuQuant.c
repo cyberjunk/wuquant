@@ -149,7 +149,7 @@ __forceinline static void TopA(const Box* c, const int position, const Moment* m
    Top(m, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, v, w);
 }
 
-__forceinline static void Maximize(Quantizer* quantizer, Box* cube, V4i* cut, V4f* whole, float wholeW, V4f* ma)
+__forceinline static void Maximize(const Quantizer* quantizer, const Box* cube, V4i* cut, const V4f* whole, const float wholeW, V4f* ma)
 {
    float max;
    V4i base; int baseW;
@@ -330,8 +330,6 @@ __forceinline static float Variance(const Moment* m, const Box* c)
    const int IDX15 = GetIndex(c->P0.R, c->P0.G, c->P0.B, c->P1.A);
    const int IDX16 = GetIndex(c->P0.R, c->P0.G, c->P0.B, c->P0.A);
 
-   //const Moment* m = quantizer->v;
-
    const float xx =
       + m[IDX1].V2  - m[IDX2].V2  - m[IDX3].V2  + m[IDX4].V2
       - m[IDX5].V2  + m[IDX6].V2  + m[IDX7].V2  - m[IDX8].V2
@@ -351,60 +349,44 @@ __forceinline static float Variance(const Moment* m, const Box* c)
    return xx - sub.m128_f32[0];
 }
 
-__forceinline static int Cut(Quantizer* quantizer, Box* set1, Box* set2)
+__forceinline static int Cut(const Quantizer* quantizer, Box* set1, Box* set2)
 {
    V4f whole; float wholeW;
-   Volume(set1, quantizer->v, &whole, &wholeW);
-
    V4f max; V4i cut;
+   V4i sub1; V4i sub2;
+
+   Volume(set1, quantizer->v, &whole, &wholeW);
    Maximize(quantizer, set1, &cut, &whole, wholeW, &max);
 
-   set2->P1.R = set1->P1.R;
-   set2->P1.G = set1->P1.G;
-   set2->P1.B = set1->P1.B;
-   set2->P1.A = set1->P1.A;
+   set2->P1.SSE = set1->P1.SSE;
+   set2->P0.SSE = set1->P0.SSE;
 
    // RED
-   if ((max.R >= max.G) && (max.R >= max.B) && (max.R >= max.A))
+   if ((max.R >= max.G) & (max.R >= max.B) & (max.R >= max.A))
    {
       if (cut.R < 0)
          return 0;
 
       set2->P0.R = set1->P1.R = cut.R;
-      set2->P0.G = set1->P0.G;
-      set2->P0.B = set1->P0.B;
-      set2->P0.A = set1->P0.A;
    }
 
    // GREEN
-   else if ((max.G >= max.R) && (max.G >= max.B) && (max.G >= max.A))
-   {
+   else if ((max.G >= max.R) & (max.G >= max.B) & (max.G >= max.A))
       set2->P0.G = set1->P1.G = cut.G;
-      set2->P0.R = set1->P0.R;
-      set2->P0.B = set1->P0.B;
-      set2->P0.A = set1->P0.A;
-   }
 
    // BLUE
-   else if ((max.B >= max.R) && (max.B >= max.G) && (max.B >= max.A))
-   {
+   else if ((max.B >= max.R) & (max.B >= max.G) & (max.B >= max.A))
       set2->P0.B = set1->P1.B = cut.B;
-      set2->P0.R = set1->P0.R;
-      set2->P0.G = set1->P0.G;
-      set2->P0.A = set1->P0.A;
-   }
 
    // ALPHA
    else
-   {
       set2->P0.A = set1->P1.A = cut.A;
-      set2->P0.R = set1->P0.R;
-      set2->P0.G = set1->P0.G;
-      set2->P0.B = set1->P0.B;
-   }
 
-   set1->Volume = (set1->P1.R - set1->P0.R) * (set1->P1.G - set1->P0.G) * (set1->P1.B - set1->P0.B) * (set1->P1.A - set1->P0.A);
-   set2->Volume = (set2->P1.R - set2->P0.R) * (set2->P1.G - set2->P0.G) * (set2->P1.B - set2->P0.B) * (set2->P1.A - set2->P0.A);
+   sub1.SSE = _mm_sub_epi32(set1->P1.SSE, set1->P0.SSE);
+   sub2.SSE = _mm_sub_epi32(set2->P1.SSE, set2->P0.SSE);
+
+   set1->Volume = sub1.R * sub1.G * sub1.B * sub1.A;
+   set2->Volume = sub2.R * sub2.G * sub2.B * sub2.A;
 
    return 1;
 }
