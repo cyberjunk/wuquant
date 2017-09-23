@@ -284,7 +284,7 @@ __forceinline static void _Volume(const Moment* m,
       m[IDX13].V - m[IDX14].V - m[IDX15].V + m[IDX16].V);
 }
 
-__forceinline static void Volume(const Box* cube, const Quantizer* quantizer, V4f* col, float* w)
+__forceinline static void Volume(const Box* cube, const Moment* m, V4f* col, float* w)
 {
    const int IDX1 = GetIndex(cube->R1, cube->G1, cube->B1, cube->A1);
    const int IDX2 = GetIndex(cube->R1, cube->G1, cube->B1, cube->A0);
@@ -303,32 +303,32 @@ __forceinline static void Volume(const Box* cube, const Quantizer* quantizer, V4
    const int IDX15 = GetIndex(cube->R0, cube->G0, cube->B0, cube->A1);
    const int IDX16 = GetIndex(cube->R0, cube->G0, cube->B0, cube->A0);
 
-   _Volume(quantizer->v, 
+   _Volume(m, 
       IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8,
       IDX9, IDX10, IDX11, IDX12, IDX13, IDX14, IDX15, IDX16,
       col, w);
 }
 
-__forceinline static float Variance(const Quantizer* quantizer, const Box* cube)
+__forceinline static float Variance(const Moment* m, const Box* c)
 {
-   const int IDX1 = GetIndex(cube->R1, cube->G1, cube->B1, cube->A1);
-   const int IDX2 = GetIndex(cube->R1, cube->G1, cube->B1, cube->A0);
-   const int IDX3 = GetIndex(cube->R1, cube->G1, cube->B0, cube->A1);
-   const int IDX4 = GetIndex(cube->R1, cube->G1, cube->B0, cube->A0);
-   const int IDX5 = GetIndex(cube->R1, cube->G0, cube->B1, cube->A1);
-   const int IDX6 = GetIndex(cube->R1, cube->G0, cube->B1, cube->A0);
-   const int IDX7 = GetIndex(cube->R1, cube->G0, cube->B0, cube->A1);
-   const int IDX8 = GetIndex(cube->R1, cube->G0, cube->B0, cube->A0);
-   const int IDX9 = GetIndex(cube->R0, cube->G1, cube->B1, cube->A1);
-   const int IDX10 = GetIndex(cube->R0, cube->G1, cube->B1, cube->A0);
-   const int IDX11 = GetIndex(cube->R0, cube->G1, cube->B0, cube->A1);
-   const int IDX12 = GetIndex(cube->R0, cube->G1, cube->B0, cube->A0);
-   const int IDX13 = GetIndex(cube->R0, cube->G0, cube->B1, cube->A1);
-   const int IDX14 = GetIndex(cube->R0, cube->G0, cube->B1, cube->A0);
-   const int IDX15 = GetIndex(cube->R0, cube->G0, cube->B0, cube->A1);
-   const int IDX16 = GetIndex(cube->R0, cube->G0, cube->B0, cube->A0);
+   const int IDX1 = GetIndex(c->R1, c->G1, c->B1, c->A1);
+   const int IDX2 = GetIndex(c->R1, c->G1, c->B1, c->A0);
+   const int IDX3 = GetIndex(c->R1, c->G1, c->B0, c->A1);
+   const int IDX4 = GetIndex(c->R1, c->G1, c->B0, c->A0);
+   const int IDX5 = GetIndex(c->R1, c->G0, c->B1, c->A1);
+   const int IDX6 = GetIndex(c->R1, c->G0, c->B1, c->A0);
+   const int IDX7 = GetIndex(c->R1, c->G0, c->B0, c->A1);
+   const int IDX8 = GetIndex(c->R1, c->G0, c->B0, c->A0);
+   const int IDX9 = GetIndex(c->R0, c->G1, c->B1, c->A1);
+   const int IDX10 = GetIndex(c->R0, c->G1, c->B1, c->A0);
+   const int IDX11 = GetIndex(c->R0, c->G1, c->B0, c->A1);
+   const int IDX12 = GetIndex(c->R0, c->G1, c->B0, c->A0);
+   const int IDX13 = GetIndex(c->R0, c->G0, c->B1, c->A1);
+   const int IDX14 = GetIndex(c->R0, c->G0, c->B1, c->A0);
+   const int IDX15 = GetIndex(c->R0, c->G0, c->B0, c->A1);
+   const int IDX16 = GetIndex(c->R0, c->G0, c->B0, c->A0);
 
-   const Moment* m = quantizer->v;
+   //const Moment* m = quantizer->v;
 
    const float xx =
       + m[IDX1].V2  - m[IDX2].V2  - m[IDX3].V2  + m[IDX4].V2
@@ -352,7 +352,7 @@ __forceinline static float Variance(const Quantizer* quantizer, const Box* cube)
 __forceinline static int Cut(Quantizer* quantizer, Box* set1, Box* set2)
 {
    V4f whole; float wholeW;
-   Volume(set1, quantizer, &whole, &wholeW);
+   Volume(set1, quantizer->v, &whole, &wholeW);
 
    int cutr;
    int cutg;
@@ -364,68 +364,48 @@ __forceinline static int Cut(Quantizer* quantizer, Box* set1, Box* set2)
    float maxb = MaximizeB(quantizer, set1, set1->B0 + 1, set1->B1, &cutb, &whole, wholeW);
    float maxa = MaximizeA(quantizer, set1, set1->A0 + 1, set1->A1, &cuta, &whole, wholeW);
 
-   int dir;
-
-   if ((maxr >= maxg) && (maxr >= maxb) && (maxr >= maxa))
-   {
-      dir = 3;
-
-      if (cutr < 0)
-      {
-         return 0;
-      }
-   }
-   else if ((maxg >= maxr) && (maxg >= maxb) && (maxg >= maxa))
-   {
-      dir = 2;
-   }
-   else if ((maxb >= maxr) && (maxb >= maxg) && (maxb >= maxa))
-   {
-      dir = 1;
-   }
-   else
-   {
-      dir = 0;
-   }
-
    set2->R1 = set1->R1;
    set2->G1 = set1->G1;
    set2->B1 = set1->B1;
    set2->A1 = set1->A1;
 
-   switch (dir)
+   // RED
+   if ((maxr >= maxg) && (maxr >= maxb) && (maxr >= maxa))
    {
-      // Red
-   case 3:
+      if (cutr < 0)
+         return 0;
+
       set2->R0 = set1->R1 = cutr;
       set2->G0 = set1->G0;
       set2->B0 = set1->B0;
       set2->A0 = set1->A0;
-      break;
+   }
 
-      // Green
-   case 2:
+   // GREEN
+   else if ((maxg >= maxr) && (maxg >= maxb) && (maxg >= maxa))
+   {
       set2->G0 = set1->G1 = cutg;
       set2->R0 = set1->R0;
       set2->B0 = set1->B0;
       set2->A0 = set1->A0;
-      break;
+   }
 
-      // Blue
-   case 1:
+   // BLUE
+   else if ((maxb >= maxr) && (maxb >= maxg) && (maxb >= maxa))
+   {
       set2->B0 = set1->B1 = cutb;
       set2->R0 = set1->R0;
       set2->G0 = set1->G0;
       set2->A0 = set1->A0;
-      break;
+   }
 
-      // Alpha
-   case 0:
+   // ALPHA
+   else
+   {
       set2->A0 = set1->A1 = cuta;
       set2->R0 = set1->R0;
       set2->G0 = set1->G0;
       set2->B0 = set1->B0;
-      break;
    }
 
    set1->Volume = (set1->R1 - set1->R0) * (set1->G1 - set1->G0) * (set1->B1 - set1->B0) * (set1->A1 - set1->A0);
@@ -541,8 +521,8 @@ static void BuildCube(Quantizer* quantizer, int* colorCount)
    {
       if (Cut(quantizer, &quantizer->cube[next], &quantizer->cube[i]))
       {
-         quantizer->cube[next].vv = quantizer->cube[next].Volume > 1 ? Variance(quantizer, &quantizer->cube[next]) : 0.0f;
-         quantizer->cube[i].vv = quantizer->cube[i].Volume > 1 ? Variance(quantizer, &quantizer->cube[i]) : 0.0f;
+         quantizer->cube[next].vv = quantizer->cube[next].Volume > 1 ? Variance(quantizer->v, &quantizer->cube[next]) : 0.0f;
+         quantizer->cube[i].vv = quantizer->cube[i].Volume > 1 ? Variance(quantizer->v, &quantizer->cube[i]) : 0.0f;
       }
       else
       {
@@ -581,7 +561,7 @@ static void GenerateResult(Quantizer* quantizer, unsigned int* image, unsigned i
       Mark(quantizer, &quantizer->cube[k], (char)k);
 
       V4f d; float weight;
-      Volume(&quantizer->cube[k], quantizer, &d, &weight);
+      Volume(&quantizer->cube[k], quantizer->v, &d, &weight);
 
       if (weight > 0.01 || weight < -0.01)
       {
