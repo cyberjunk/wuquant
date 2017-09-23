@@ -9,9 +9,14 @@
 #define MASK_ONE      _mm_set1_epi32(1)
 #define MASK_SHIFTIDX _mm_set_epi32(8 - INDEXALPHABITS, 8 - INDEXBITS, 8 - INDEXBITS, 8 - INDEXBITS)
 
-__forceinline static int GetIndex(const int r, const int g, const int b, const int a)
+__forceinline static unsigned int GetIndex(
+   const unsigned int r, 
+   const unsigned int g, 
+   const unsigned int b, 
+   const unsigned int a)
 {
-   return (r << ((INDEXBITS * 2) + INDEXALPHABITS))
+   return 
+        (r << ((INDEXBITS * 2) + INDEXALPHABITS))
       + (r << (INDEXBITS + INDEXALPHABITS + 1))
       + (g << (INDEXBITS + INDEXALPHABITS))
       + (r << (INDEXBITS * 2))
@@ -22,8 +27,8 @@ __forceinline static int GetIndex(const int r, const int g, const int b, const i
 }
 
 __forceinline static void Bottom(const Moment* m, 
-   const int IDX1, const int IDX2, const int IDX3, const int IDX4, 
-   const int IDX5, const int IDX6, const int IDX7, const int IDX8, 
+   const unsigned int IDX1, const unsigned int IDX2, const unsigned int IDX3, const unsigned int IDX4,
+   const unsigned int IDX5, const unsigned int IDX6, const unsigned int IDX7, const unsigned int IDX8,
    V4i* v, int* w)
 {
    const __m128i s1 = _mm_setzero_si128();
@@ -39,56 +44,56 @@ __forceinline static void Bottom(const Moment* m,
 }
 __forceinline static void BottomR(const Box* c, const Moment* m, V4i* v, int* w)
 {
-   const int IDX1 = GetIndex(c->P0.R, c->P1.G, c->P1.B, c->P1.A);
-   const int IDX2 = GetIndex(c->P0.R, c->P1.G, c->P1.B, c->P0.A);
-   const int IDX3 = GetIndex(c->P0.R, c->P1.G, c->P0.B, c->P1.A);
-   const int IDX4 = GetIndex(c->P0.R, c->P1.G, c->P0.B, c->P0.A);
-   const int IDX5 = GetIndex(c->P0.R, c->P0.G, c->P1.B, c->P1.A);
-   const int IDX6 = GetIndex(c->P0.R, c->P0.G, c->P1.B, c->P0.A);
-   const int IDX7 = GetIndex(c->P0.R, c->P0.G, c->P0.B, c->P1.A);
-   const int IDX8 = GetIndex(c->P0.R, c->P0.G, c->P0.B, c->P0.A);
+   const unsigned int IDX1 = GetIndex(c->P0.R, c->P1.G, c->P1.B, c->P1.A);
+   const unsigned int IDX2 = GetIndex(c->P0.R, c->P1.G, c->P1.B, c->P0.A);
+   const unsigned int IDX3 = GetIndex(c->P0.R, c->P1.G, c->P0.B, c->P1.A);
+   const unsigned int IDX4 = GetIndex(c->P0.R, c->P1.G, c->P0.B, c->P0.A);
+   const unsigned int IDX5 = GetIndex(c->P0.R, c->P0.G, c->P1.B, c->P1.A);
+   const unsigned int IDX6 = GetIndex(c->P0.R, c->P0.G, c->P1.B, c->P0.A);
+   const unsigned int IDX7 = GetIndex(c->P0.R, c->P0.G, c->P0.B, c->P1.A);
+   const unsigned int IDX8 = GetIndex(c->P0.R, c->P0.G, c->P0.B, c->P0.A);
    Bottom(m, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, v, w);
 }
 __forceinline static void BottomG(const Box* c, const Moment* m, V4i* v, int* w)
 {
-   const int IDX1 = GetIndex(c->P1.R, c->P0.G, c->P1.B, c->P1.A);
-   const int IDX2 = GetIndex(c->P1.R, c->P0.G, c->P1.B, c->P0.A);
-   const int IDX3 = GetIndex(c->P1.R, c->P0.G, c->P0.B, c->P1.A);
-   const int IDX4 = GetIndex(c->P1.R, c->P0.G, c->P0.B, c->P0.A);
-   const int IDX5 = GetIndex(c->P0.R, c->P0.G, c->P1.B, c->P1.A);
-   const int IDX6 = GetIndex(c->P0.R, c->P0.G, c->P1.B, c->P0.A);
-   const int IDX7 = GetIndex(c->P0.R, c->P0.G, c->P0.B, c->P1.A);
-   const int IDX8 = GetIndex(c->P0.R, c->P0.G, c->P0.B, c->P0.A);
+   const unsigned int IDX1 = GetIndex(c->P1.R, c->P0.G, c->P1.B, c->P1.A);
+   const unsigned int IDX2 = GetIndex(c->P1.R, c->P0.G, c->P1.B, c->P0.A);
+   const unsigned int IDX3 = GetIndex(c->P1.R, c->P0.G, c->P0.B, c->P1.A);
+   const unsigned int IDX4 = GetIndex(c->P1.R, c->P0.G, c->P0.B, c->P0.A);
+   const unsigned int IDX5 = GetIndex(c->P0.R, c->P0.G, c->P1.B, c->P1.A);
+   const unsigned int IDX6 = GetIndex(c->P0.R, c->P0.G, c->P1.B, c->P0.A);
+   const unsigned int IDX7 = GetIndex(c->P0.R, c->P0.G, c->P0.B, c->P1.A);
+   const unsigned int IDX8 = GetIndex(c->P0.R, c->P0.G, c->P0.B, c->P0.A);
    Bottom(m, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, v, w);
 }
 __forceinline static void BottomB(const Box* c, const Moment* m, V4i* v, int* w)
 {
-   const int IDX1 = GetIndex(c->P1.R, c->P1.G, c->P0.B, c->P1.A);
-   const int IDX2 = GetIndex(c->P1.R, c->P1.G, c->P0.B, c->P0.A);
-   const int IDX3 = GetIndex(c->P1.R, c->P0.G, c->P0.B, c->P1.A);
-   const int IDX4 = GetIndex(c->P1.R, c->P0.G, c->P0.B, c->P0.A);
-   const int IDX5 = GetIndex(c->P0.R, c->P1.G, c->P0.B, c->P1.A);
-   const int IDX6 = GetIndex(c->P0.R, c->P1.G, c->P0.B, c->P0.A);
-   const int IDX7 = GetIndex(c->P0.R, c->P0.G, c->P0.B, c->P1.A);
-   const int IDX8 = GetIndex(c->P0.R, c->P0.G, c->P0.B, c->P0.A);
+   const unsigned int IDX1 = GetIndex(c->P1.R, c->P1.G, c->P0.B, c->P1.A);
+   const unsigned int IDX2 = GetIndex(c->P1.R, c->P1.G, c->P0.B, c->P0.A);
+   const unsigned int IDX3 = GetIndex(c->P1.R, c->P0.G, c->P0.B, c->P1.A);
+   const unsigned int IDX4 = GetIndex(c->P1.R, c->P0.G, c->P0.B, c->P0.A);
+   const unsigned int IDX5 = GetIndex(c->P0.R, c->P1.G, c->P0.B, c->P1.A);
+   const unsigned int IDX6 = GetIndex(c->P0.R, c->P1.G, c->P0.B, c->P0.A);
+   const unsigned int IDX7 = GetIndex(c->P0.R, c->P0.G, c->P0.B, c->P1.A);
+   const unsigned int IDX8 = GetIndex(c->P0.R, c->P0.G, c->P0.B, c->P0.A);
    Bottom(m, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, v, w);
 }
 __forceinline static void BottomA(const Box* c, const Moment* m, V4i* v, int* w)
 {
-   const int IDX1 = GetIndex(c->P1.R, c->P1.G, c->P1.B, c->P0.A);
-   const int IDX2 = GetIndex(c->P1.R, c->P1.G, c->P0.B, c->P0.A);
-   const int IDX3 = GetIndex(c->P1.R, c->P0.G, c->P1.B, c->P0.A);
-   const int IDX4 = GetIndex(c->P1.R, c->P0.G, c->P0.B, c->P0.A);
-   const int IDX5 = GetIndex(c->P0.R, c->P1.G, c->P1.B, c->P0.A);
-   const int IDX6 = GetIndex(c->P0.R, c->P1.G, c->P0.B, c->P0.A);
-   const int IDX7 = GetIndex(c->P0.R, c->P0.G, c->P1.B, c->P0.A);
-   const int IDX8 = GetIndex(c->P0.R, c->P0.G, c->P0.B, c->P0.A);
+   const unsigned int IDX1 = GetIndex(c->P1.R, c->P1.G, c->P1.B, c->P0.A);
+   const unsigned int IDX2 = GetIndex(c->P1.R, c->P1.G, c->P0.B, c->P0.A);
+   const unsigned int IDX3 = GetIndex(c->P1.R, c->P0.G, c->P1.B, c->P0.A);
+   const unsigned int IDX4 = GetIndex(c->P1.R, c->P0.G, c->P0.B, c->P0.A);
+   const unsigned int IDX5 = GetIndex(c->P0.R, c->P1.G, c->P1.B, c->P0.A);
+   const unsigned int IDX6 = GetIndex(c->P0.R, c->P1.G, c->P0.B, c->P0.A);
+   const unsigned int IDX7 = GetIndex(c->P0.R, c->P0.G, c->P1.B, c->P0.A);
+   const unsigned int IDX8 = GetIndex(c->P0.R, c->P0.G, c->P0.B, c->P0.A);
    Bottom(m, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, v, w);
 }
 
 __forceinline static void Top(const Moment* m,
-   const int IDX1, const int IDX2, const int IDX3, const int IDX4,
-   const int IDX5, const int IDX6, const int IDX7, const int IDX8,
+   const unsigned int IDX1, const unsigned int IDX2, const unsigned int IDX3, const unsigned int IDX4,
+   const unsigned int IDX5, const unsigned int IDX6, const unsigned int IDX7, const unsigned int IDX8,
    V4i* v, int* w)
 {
    const __m128i s1 = _mm_sub_epi32(m[IDX1].P.SSE, m[IDX2].P.SSE);
@@ -102,50 +107,50 @@ __forceinline static void Top(const Moment* m,
 }
 __forceinline static void TopR(const Box* c, const int position, const Moment* m, V4i* v, int* w)
 {
-   const int IDX1 = GetIndex(position, c->P1.G, c->P1.B, c->P1.A);
-   const int IDX2 = GetIndex(position, c->P1.G, c->P1.B, c->P0.A);
-   const int IDX3 = GetIndex(position, c->P1.G, c->P0.B, c->P1.A);
-   const int IDX4 = GetIndex(position, c->P1.G, c->P0.B, c->P0.A);
-   const int IDX5 = GetIndex(position, c->P0.G, c->P1.B, c->P1.A);
-   const int IDX6 = GetIndex(position, c->P0.G, c->P1.B, c->P0.A);
-   const int IDX7 = GetIndex(position, c->P0.G, c->P0.B, c->P1.A);
-   const int IDX8 = GetIndex(position, c->P0.G, c->P0.B, c->P0.A);
+   const unsigned int IDX1 = GetIndex(position, c->P1.G, c->P1.B, c->P1.A);
+   const unsigned int IDX2 = GetIndex(position, c->P1.G, c->P1.B, c->P0.A);
+   const unsigned int IDX3 = GetIndex(position, c->P1.G, c->P0.B, c->P1.A);
+   const unsigned int IDX4 = GetIndex(position, c->P1.G, c->P0.B, c->P0.A);
+   const unsigned int IDX5 = GetIndex(position, c->P0.G, c->P1.B, c->P1.A);
+   const unsigned int IDX6 = GetIndex(position, c->P0.G, c->P1.B, c->P0.A);
+   const unsigned int IDX7 = GetIndex(position, c->P0.G, c->P0.B, c->P1.A);
+   const unsigned int IDX8 = GetIndex(position, c->P0.G, c->P0.B, c->P0.A);
    Top(m, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, v, w);
 }
 __forceinline static void TopG(const Box* c, const int position, const Moment* m, V4i* v, int* w)
 {
-   const int IDX1 = GetIndex(c->P1.R, position, c->P1.B, c->P1.A);
-   const int IDX2 = GetIndex(c->P1.R, position, c->P1.B, c->P0.A);
-   const int IDX3 = GetIndex(c->P1.R, position, c->P0.B, c->P1.A);
-   const int IDX4 = GetIndex(c->P1.R, position, c->P0.B, c->P0.A);
-   const int IDX5 = GetIndex(c->P0.R, position, c->P1.B, c->P1.A);
-   const int IDX6 = GetIndex(c->P0.R, position, c->P1.B, c->P0.A);
-   const int IDX7 = GetIndex(c->P0.R, position, c->P0.B, c->P1.A);
-   const int IDX8 = GetIndex(c->P0.R, position, c->P0.B, c->P0.A);
+   const unsigned int IDX1 = GetIndex(c->P1.R, position, c->P1.B, c->P1.A);
+   const unsigned int IDX2 = GetIndex(c->P1.R, position, c->P1.B, c->P0.A);
+   const unsigned int IDX3 = GetIndex(c->P1.R, position, c->P0.B, c->P1.A);
+   const unsigned int IDX4 = GetIndex(c->P1.R, position, c->P0.B, c->P0.A);
+   const unsigned int IDX5 = GetIndex(c->P0.R, position, c->P1.B, c->P1.A);
+   const unsigned int IDX6 = GetIndex(c->P0.R, position, c->P1.B, c->P0.A);
+   const unsigned int IDX7 = GetIndex(c->P0.R, position, c->P0.B, c->P1.A);
+   const unsigned int IDX8 = GetIndex(c->P0.R, position, c->P0.B, c->P0.A);
    Top(m, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, v, w);
 }
 __forceinline static void TopB(const Box* c, const int position, const Moment* m, V4i* v, int* w)
 {
-   const int IDX1 = GetIndex(c->P1.R, c->P1.G, position, c->P1.A);
-   const int IDX2 = GetIndex(c->P1.R, c->P1.G, position, c->P0.A);
-   const int IDX3 = GetIndex(c->P1.R, c->P0.G, position, c->P1.A);
-   const int IDX4 = GetIndex(c->P1.R, c->P0.G, position, c->P0.A);
-   const int IDX5 = GetIndex(c->P0.R, c->P1.G, position, c->P1.A);
-   const int IDX6 = GetIndex(c->P0.R, c->P1.G, position, c->P0.A);
-   const int IDX7 = GetIndex(c->P0.R, c->P0.G, position, c->P1.A);
-   const int IDX8 = GetIndex(c->P0.R, c->P0.G, position, c->P0.A);
+   const unsigned int IDX1 = GetIndex(c->P1.R, c->P1.G, position, c->P1.A);
+   const unsigned int IDX2 = GetIndex(c->P1.R, c->P1.G, position, c->P0.A);
+   const unsigned int IDX3 = GetIndex(c->P1.R, c->P0.G, position, c->P1.A);
+   const unsigned int IDX4 = GetIndex(c->P1.R, c->P0.G, position, c->P0.A);
+   const unsigned int IDX5 = GetIndex(c->P0.R, c->P1.G, position, c->P1.A);
+   const unsigned int IDX6 = GetIndex(c->P0.R, c->P1.G, position, c->P0.A);
+   const unsigned int IDX7 = GetIndex(c->P0.R, c->P0.G, position, c->P1.A);
+   const unsigned int IDX8 = GetIndex(c->P0.R, c->P0.G, position, c->P0.A);
    Top(m, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, v, w);
 }
 __forceinline static void TopA(const Box* c, const int position, const Moment* m, V4i* v, int* w)
 {
-   const int IDX1 = GetIndex(c->P1.R, c->P1.G, c->P1.B, position);
-   const int IDX2 = GetIndex(c->P1.R, c->P1.G, c->P0.B, position);
-   const int IDX3 = GetIndex(c->P1.R, c->P0.G, c->P1.B, position);
-   const int IDX4 = GetIndex(c->P1.R, c->P0.G, c->P0.B, position);
-   const int IDX5 = GetIndex(c->P0.R, c->P1.G, c->P1.B, position);
-   const int IDX6 = GetIndex(c->P0.R, c->P1.G, c->P0.B, position);
-   const int IDX7 = GetIndex(c->P0.R, c->P0.G, c->P1.B, position);
-   const int IDX8 = GetIndex(c->P0.R, c->P0.G, c->P0.B, position);
+   const unsigned int IDX1 = GetIndex(c->P1.R, c->P1.G, c->P1.B, position);
+   const unsigned int IDX2 = GetIndex(c->P1.R, c->P1.G, c->P0.B, position);
+   const unsigned int IDX3 = GetIndex(c->P1.R, c->P0.G, c->P1.B, position);
+   const unsigned int IDX4 = GetIndex(c->P1.R, c->P0.G, c->P0.B, position);
+   const unsigned int IDX5 = GetIndex(c->P0.R, c->P1.G, c->P1.B, position);
+   const unsigned int IDX6 = GetIndex(c->P0.R, c->P1.G, c->P0.B, position);
+   const unsigned int IDX7 = GetIndex(c->P0.R, c->P0.G, c->P1.B, position);
+   const unsigned int IDX8 = GetIndex(c->P0.R, c->P0.G, c->P0.B, position);
    Top(m, IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8, v, w);
 }
 
@@ -256,10 +261,10 @@ __forceinline static void Maximize(const Quantizer* quantizer, const Box* cube, 
 }
 
 __forceinline static void _Volume(const Moment* m,
-   const int IDX1, const int IDX2, const int IDX3, const int IDX4,
-   const int IDX5, const int IDX6, const int IDX7, const int IDX8,
-   const int IDX9, const int IDX10, const int IDX11, const int IDX12,
-   const int IDX13, const int IDX14, const int IDX15, const int IDX16,
+   const unsigned int IDX1, const unsigned int IDX2, const unsigned int IDX3, const unsigned int IDX4,
+   const unsigned int IDX5, const unsigned int IDX6, const unsigned int IDX7, const unsigned int IDX8,
+   const unsigned int IDX9, const unsigned int IDX10, const unsigned int IDX11, const unsigned int IDX12,
+   const unsigned int IDX13, const unsigned int IDX14, const unsigned int IDX15, const unsigned int IDX16,
    V4f* v, float* w)
 {
    __m128i s01 = _mm_sub_epi32(m[IDX1].P.SSE, m[IDX2].P.SSE);
@@ -288,22 +293,22 @@ __forceinline static void _Volume(const Moment* m,
 
 __forceinline static void Volume(const Box* cube, const Moment* m, V4f* col, float* w)
 {
-   const int IDX1 = GetIndex(cube->P1.R, cube->P1.G, cube->P1.B, cube->P1.A);
-   const int IDX2 = GetIndex(cube->P1.R, cube->P1.G, cube->P1.B, cube->P0.A);
-   const int IDX3 = GetIndex(cube->P1.R, cube->P1.G, cube->P0.B, cube->P1.A);
-   const int IDX4 = GetIndex(cube->P1.R, cube->P1.G, cube->P0.B, cube->P0.A);
-   const int IDX5 = GetIndex(cube->P1.R, cube->P0.G, cube->P1.B, cube->P1.A);
-   const int IDX6 = GetIndex(cube->P1.R, cube->P0.G, cube->P1.B, cube->P0.A);
-   const int IDX7 = GetIndex(cube->P1.R, cube->P0.G, cube->P0.B, cube->P1.A);
-   const int IDX8 = GetIndex(cube->P1.R, cube->P0.G, cube->P0.B, cube->P0.A);
-   const int IDX9 = GetIndex(cube->P0.R, cube->P1.G, cube->P1.B, cube->P1.A);
-   const int IDX10 = GetIndex(cube->P0.R, cube->P1.G, cube->P1.B, cube->P0.A);
-   const int IDX11 = GetIndex(cube->P0.R, cube->P1.G, cube->P0.B, cube->P1.A);
-   const int IDX12 = GetIndex(cube->P0.R, cube->P1.G, cube->P0.B, cube->P0.A);
-   const int IDX13 = GetIndex(cube->P0.R, cube->P0.G, cube->P1.B, cube->P1.A);
-   const int IDX14 = GetIndex(cube->P0.R, cube->P0.G, cube->P1.B, cube->P0.A);
-   const int IDX15 = GetIndex(cube->P0.R, cube->P0.G, cube->P0.B, cube->P1.A);
-   const int IDX16 = GetIndex(cube->P0.R, cube->P0.G, cube->P0.B, cube->P0.A);
+   const unsigned int IDX1 = GetIndex(cube->P1.R, cube->P1.G, cube->P1.B, cube->P1.A);
+   const unsigned int IDX2 = GetIndex(cube->P1.R, cube->P1.G, cube->P1.B, cube->P0.A);
+   const unsigned int IDX3 = GetIndex(cube->P1.R, cube->P1.G, cube->P0.B, cube->P1.A);
+   const unsigned int IDX4 = GetIndex(cube->P1.R, cube->P1.G, cube->P0.B, cube->P0.A);
+   const unsigned int IDX5 = GetIndex(cube->P1.R, cube->P0.G, cube->P1.B, cube->P1.A);
+   const unsigned int IDX6 = GetIndex(cube->P1.R, cube->P0.G, cube->P1.B, cube->P0.A);
+   const unsigned int IDX7 = GetIndex(cube->P1.R, cube->P0.G, cube->P0.B, cube->P1.A);
+   const unsigned int IDX8 = GetIndex(cube->P1.R, cube->P0.G, cube->P0.B, cube->P0.A);
+   const unsigned int IDX9 = GetIndex(cube->P0.R, cube->P1.G, cube->P1.B, cube->P1.A);
+   const unsigned int IDX10 = GetIndex(cube->P0.R, cube->P1.G, cube->P1.B, cube->P0.A);
+   const unsigned int IDX11 = GetIndex(cube->P0.R, cube->P1.G, cube->P0.B, cube->P1.A);
+   const unsigned int IDX12 = GetIndex(cube->P0.R, cube->P1.G, cube->P0.B, cube->P0.A);
+   const unsigned int IDX13 = GetIndex(cube->P0.R, cube->P0.G, cube->P1.B, cube->P1.A);
+   const unsigned int IDX14 = GetIndex(cube->P0.R, cube->P0.G, cube->P1.B, cube->P0.A);
+   const unsigned int IDX15 = GetIndex(cube->P0.R, cube->P0.G, cube->P0.B, cube->P1.A);
+   const unsigned int IDX16 = GetIndex(cube->P0.R, cube->P0.G, cube->P0.B, cube->P0.A);
 
    _Volume(m, 
       IDX1, IDX2, IDX3, IDX4, IDX5, IDX6, IDX7, IDX8,
@@ -313,22 +318,22 @@ __forceinline static void Volume(const Box* cube, const Moment* m, V4f* col, flo
 
 __forceinline static float Variance(const Moment* m, const Box* c)
 {
-   const int IDX1 = GetIndex(c->P1.R, c->P1.G, c->P1.B, c->P1.A);
-   const int IDX2 = GetIndex(c->P1.R, c->P1.G, c->P1.B, c->P0.A);
-   const int IDX3 = GetIndex(c->P1.R, c->P1.G, c->P0.B, c->P1.A);
-   const int IDX4 = GetIndex(c->P1.R, c->P1.G, c->P0.B, c->P0.A);
-   const int IDX5 = GetIndex(c->P1.R, c->P0.G, c->P1.B, c->P1.A);
-   const int IDX6 = GetIndex(c->P1.R, c->P0.G, c->P1.B, c->P0.A);
-   const int IDX7 = GetIndex(c->P1.R, c->P0.G, c->P0.B, c->P1.A);
-   const int IDX8 = GetIndex(c->P1.R, c->P0.G, c->P0.B, c->P0.A);
-   const int IDX9 = GetIndex(c->P0.R, c->P1.G, c->P1.B, c->P1.A);
-   const int IDX10 = GetIndex(c->P0.R, c->P1.G, c->P1.B, c->P0.A);
-   const int IDX11 = GetIndex(c->P0.R, c->P1.G, c->P0.B, c->P1.A);
-   const int IDX12 = GetIndex(c->P0.R, c->P1.G, c->P0.B, c->P0.A);
-   const int IDX13 = GetIndex(c->P0.R, c->P0.G, c->P1.B, c->P1.A);
-   const int IDX14 = GetIndex(c->P0.R, c->P0.G, c->P1.B, c->P0.A);
-   const int IDX15 = GetIndex(c->P0.R, c->P0.G, c->P0.B, c->P1.A);
-   const int IDX16 = GetIndex(c->P0.R, c->P0.G, c->P0.B, c->P0.A);
+   const unsigned int IDX1 = GetIndex(c->P1.R, c->P1.G, c->P1.B, c->P1.A);
+   const unsigned int IDX2 = GetIndex(c->P1.R, c->P1.G, c->P1.B, c->P0.A);
+   const unsigned int IDX3 = GetIndex(c->P1.R, c->P1.G, c->P0.B, c->P1.A);
+   const unsigned int IDX4 = GetIndex(c->P1.R, c->P1.G, c->P0.B, c->P0.A);
+   const unsigned int IDX5 = GetIndex(c->P1.R, c->P0.G, c->P1.B, c->P1.A);
+   const unsigned int IDX6 = GetIndex(c->P1.R, c->P0.G, c->P1.B, c->P0.A);
+   const unsigned int IDX7 = GetIndex(c->P1.R, c->P0.G, c->P0.B, c->P1.A);
+   const unsigned int IDX8 = GetIndex(c->P1.R, c->P0.G, c->P0.B, c->P0.A);
+   const unsigned int IDX9 = GetIndex(c->P0.R, c->P1.G, c->P1.B, c->P1.A);
+   const unsigned int IDX10 = GetIndex(c->P0.R, c->P1.G, c->P1.B, c->P0.A);
+   const unsigned int IDX11 = GetIndex(c->P0.R, c->P1.G, c->P0.B, c->P1.A);
+   const unsigned int IDX12 = GetIndex(c->P0.R, c->P1.G, c->P0.B, c->P0.A);
+   const unsigned int IDX13 = GetIndex(c->P0.R, c->P0.G, c->P1.B, c->P1.A);
+   const unsigned int IDX14 = GetIndex(c->P0.R, c->P0.G, c->P1.B, c->P0.A);
+   const unsigned int IDX15 = GetIndex(c->P0.R, c->P0.G, c->P0.B, c->P1.A);
+   const unsigned int IDX16 = GetIndex(c->P0.R, c->P0.G, c->P0.B, c->P0.A);
 
    const float xx =
       + m[IDX1].V2  - m[IDX2].V2  - m[IDX3].V2  + m[IDX4].V2
@@ -419,7 +424,7 @@ static void Build3DHistogram(Moment* m, unsigned int* image, int width, int heig
       V4i p, in;
       p.SSE  = _mm_srlv_epi32(_mm_and_si128(_mm_set1_epi32(image[i]), MASK_AND), MASK_SHIFT);
       in.SSE = _mm_add_epi32(_mm_srlv_epi32(p.SSE, MASK_SHIFTIDX), MASK_ONE);
-      const int IDX = GetIndex(in.R, in.G, in.B, in.A);
+      const unsigned int IDX = GetIndex(in.R, in.G, in.B, in.A);
       m[IDX].P.SSE = _mm_add_epi32(m[IDX].P.SSE, p.SSE);
       m[IDX].V++;
       m[IDX].V2 += (p.R * p.R) + (p.G * p.G) + (p.B * p.B) + (p.A * p.A);
@@ -429,11 +434,11 @@ static void Build3DHistogram(Moment* m, unsigned int* image, int width, int heig
 static void Get3DMoments(Quantizer* quantizer)
 {
    V4i l;
-   for (int r = 1; r < INDEXCOUNT; r++)
+   for (unsigned int r = 1; r < INDEXCOUNT; r++)
    {
       memset(quantizer->volume, 0, sizeof(quantizer->volume));
 
-      for (int g = 1; g < INDEXCOUNT; g++)
+      for (unsigned int g = 1; g < INDEXCOUNT; g++)
       {
          memset(quantizer->area, 0, sizeof(quantizer->area));
 
@@ -444,9 +449,9 @@ static void Get3DMoments(Quantizer* quantizer)
             int v = 0;
             float v2 = 0;
 
-            for (int a = 1; a < INDEXALPHACOUNT; a++)
+            for (unsigned int a = 1; a < INDEXALPHACOUNT; a++)
             {
-               const int ind1 = GetIndex(r, g, b, a);
+               const unsigned int ind1 = GetIndex(r, g, b, a);
 
                l.SSE = _mm_add_epi32(l.SSE, quantizer->v[ind1].P.SSE);
                v  += quantizer->v[ind1].V;
@@ -456,13 +461,13 @@ static void Get3DMoments(Quantizer* quantizer)
                quantizer->area[a].V  += v;
                quantizer->area[a].V2 += v2;
 
-               const int inv = (b * INDEXALPHACOUNT) + a;
+               const unsigned int inv = (b * INDEXALPHACOUNT) + a;
 
                quantizer->volume[inv].P.SSE = _mm_add_epi32(quantizer->volume[inv].P.SSE, quantizer->area[a].P.SSE);
                quantizer->volume[inv].V  += quantizer->area[a].V;
                quantizer->volume[inv].V2 += quantizer->area[a].V2;
 
-               const int ind2 = ind1 - GetIndex(1, 0, 0, 0);
+               const unsigned int ind2 = ind1 - GetIndex(1, 0, 0, 0);
 
                quantizer->v[ind1].P.SSE = _mm_add_epi32(quantizer->v[ind2].P.SSE, quantizer->volume[inv].P.SSE);
                quantizer->v[ind1].V  = quantizer->v[ind2].V + quantizer->volume[inv].V;
@@ -508,17 +513,17 @@ static unsigned int BuildCube(Quantizer* q)
    return MAXCOLORS;
 }
 
-static void GenerateResult(Quantizer* quantizer, unsigned int* image, unsigned int* palette, int colorCount, int width, int height, char* destPixels, int padMultiple4)
+static void GenerateResult(Quantizer* quantizer, unsigned int* image, unsigned int* palette, unsigned int colorCount, unsigned int width, unsigned int height, char* destPixels, int padMultiple4)
 {
    V4f d; float weight;
    V4i di; V4i in;
 
    // rows must be a multiple of 4, hence padding up to 3 bytes for 8-bit indexed pixels
-   const int WIDTHMOD4 = width % 4;
-   const int WIDTHZEROS = WIDTHMOD4 != 0 ? 4 - WIDTHMOD4 : 0;
+   const unsigned int WIDTHMOD4 = width % 4;
+   const unsigned int WIDTHZEROS = WIDTHMOD4 != 0 ? 4 - WIDTHMOD4 : 0;
    
    // create palette
-   for (int k = 0; k < colorCount; k++)
+   for (unsigned int k = 0; k < colorCount; k++)
    {
       Mark(quantizer, &quantizer->cube[k], (char)k);
       Volume(&quantizer->cube[k], quantizer->v, &d, &weight);
@@ -535,14 +540,14 @@ static void GenerateResult(Quantizer* quantizer, unsigned int* image, unsigned i
    }
 
    // create pixels
-   for (int ri = 0; ri < height; ri++)
+   for (unsigned int ri = 0; ri < height; ri++)
    {
-      for (int ci = 0; ci < width; ci++)
+      for (unsigned int ci = 0; ci < width; ci++)
       {
          in.SSE = _mm_add_epi32(_mm_srlv_epi32(_mm_srlv_epi32(_mm_and_si128(
             _mm_set1_epi32(image[0]), MASK_AND), MASK_SHIFT), MASK_SHIFTIDX), MASK_ONE);
          
-         const int IDX = GetIndex(in.R, in.G, in.B, in.A);
+         const unsigned int IDX = GetIndex(in.R, in.G, in.B, in.A);
 
          destPixels[0] = quantizer->tag[IDX];
          destPixels++;
@@ -552,7 +557,7 @@ static void GenerateResult(Quantizer* quantizer, unsigned int* image, unsigned i
       // write additional zero bytes if requested
       if (padMultiple4)
       {
-         for (int c = 0; c < WIDTHZEROS; c++)
+         for (unsigned int c = 0; c < WIDTHZEROS; c++)
          {
             destPixels[0] = 0x00;
             destPixels++;
